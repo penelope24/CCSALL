@@ -61,9 +61,7 @@ public class CFGBuild {
                     child.setDotNum("n" + (index));
                     index++;
                     String label = DotPrintFilter.filterQuotation(child.getOriginalCodeStr());
-                    int line = par.getCodeLineNum();
                     child.setSimplifyCodeStr(label);
-                    child.setCodeLineNum(line);
                     mCFG.addVertex(child);
 //                    if(astFlag) {
 //                        ASTRecurive(child.getAstRootNode(), child.getDotNum());

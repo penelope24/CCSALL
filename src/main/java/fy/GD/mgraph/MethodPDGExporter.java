@@ -32,7 +32,7 @@ public class MethodPDGExporter {
                 label.append(StringUtils.escape(node.getSimplifyCodeStr())).append("\"").append(coloredDotStr).append("];");
                 dot.println("  " + name + label.toString());
             }
-            for (Edge<GraphNode, CFEdge> edge : graph.controlFlowEdges) {
+            for (Edge<GraphNode, CFEdge> edge : graph.copyEdgeSet()) {
                 String src = nodeIdMap.get(edge.source);
                 String tgt = nodeIdMap.get(edge.target);
                 String edgeDotColorStr = "  [";
@@ -42,7 +42,7 @@ public class MethodPDGExporter {
             for (Edge<GraphNode, DFEdge> edge : graph.dataFlowEdges) {
                 String src = nodeIdMap.get(edge.source);
                 String tgt = nodeIdMap.get(edge.target);
-                String edgeDotColorStr = "  [";
+                String edgeDotColorStr = "  [color=red, ";
                 dot.println("  " + src + " -> " + tgt + edgeDotColorStr + "label=\" (" + edge.label.var + ")\"];");
             }
             dot.println("   // end-of-graph\n}");

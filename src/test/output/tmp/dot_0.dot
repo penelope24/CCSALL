@@ -1,23 +1,8 @@
 digraph SLICE_{
-  v1  [label="117:  Predicate<AccountState> cansee(String change) throws QueryParseException, PermissionBackendException"];
-  v2  [label="117:  throw error(String.format('change %s not found', change))"];
-  v3  [label="117:  Optional<ChangeNotes> changeNotes = args.changeFinder.findOne(change)"];
-  v4  [label="117:  if (!changeNotes.isPresent())"];
-  v5  [label="117:  if (!args.permissionBackend.user(args.getUser()).change(changeNotes.get()).test(ChangePermission.READ))"];
-  v6  [label="117:  return AccountPredicates.cansee(args, changeNotes.get())"];
-  v1 -> v3  [label=""];
-  v3 -> v4  [label=""];
-  v4 -> v2  [label=""];
-  v4 -> v5  [label=""];
-  v2 -> v1  [label=""];
-  v5 -> v2  [label=""];
-  v5 -> v6  [label=""];
-  v2 -> v1  [label=""];
-  v1 -> v2  [label=" ()"];
-  v3 -> v4  [label=" ()"];
-  v1 -> v2  [label=" ()"];
-  v3 -> v5  [label=" ()"];
-  v3 -> v6  [label=" ()"];
-  v1 -> v3  [label=" ()"];
+  v1  [label="223:  boolean checkedCanSeeSecondaryEmails()"];
+  v2  [label="224:  try"];
+  v3  [label="225:  return canSeeSecondaryEmails()"];
+  v1 -> v2  [label=""];
+  v2 -> v3  [label=""];
    // end-of-graph
 }

@@ -1,5 +1,24 @@
 digraph SLICE_{
-  null -> null  [label=""];
-  null -> null  [label=""];
+  v1  [label="117:  Predicate<AccountState> cansee(String change) throws QueryParseException, PermissionBackendException"];
+  v2  [label="120:  Optional<ChangeNotes> changeNotes = args.changeFinder.findOne(change)"];
+  v3  [label="121:  if (!changeNotes.isPresent())"];
+  v4  [label="122:  throw error(String.format('change %s not found', change))"];
+  v5  [label="125:  if (!args.permissionBackend.user(args.getUser()).change(changeNotes.get()).test(ChangePermission.READ))"];
+  v6  [label="129:  throw error(String.format('change %s not found', change))"];
+  v7  [label="131:  return AccountPredicates.cansee(args, changeNotes.get())"];
+  v1 -> v2  [label=""];
+  v2 -> v3  [label=""];
+  v3 -> v4  [label=""];
+  v3 -> v5  [label=""];
+  v4 -> v1  [label=""];
+  v5 -> v6  [label=""];
+  v5 -> v7  [label=""];
+  v6 -> v1  [label=""];
+  v2 -> v7  [color=red, label=" ()"];
+  v2 -> v5  [color=red, label=" ()"];
+  v1 -> v4  [color=red, label=" ()"];
+  v2 -> v3  [color=red, label=" ()"];
+  v1 -> v6  [color=red, label=" ()"];
+  v1 -> v2  [color=red, label=" ()"];
    // end-of-graph
 }

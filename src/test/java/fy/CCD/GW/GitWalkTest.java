@@ -33,10 +33,10 @@ class GitWalkTest {
         System.out.println(commitDiff.ccMap.keySet().size());
         AtomicInteger idx = new AtomicInteger();
         commitDiff.ccMap.keys().forEach(methodPDG -> {
-            System.out.println(methodPDG.n.toString());
-            System.out.println("---------");
-//            String output = "/Users/fy/Documents/fyJavaProjects/CCSALL/src/test/output/tmp/" + "dot_" + idx.getAndIncrement() + ".dot";
-//            MethodPDGExporter.export(methodPDG, output);
+//            System.out.println(methodPDG.n.toString());
+//            System.out.println("---------");
+            String output = "/Users/fy/Documents/fyJavaProjects/CCSALL/src/test/output/tmp/" + "dot_" + idx.getAndIncrement() + ".dot";
+            MethodPDGExporter.export(methodPDG, output);
         });
 
     }

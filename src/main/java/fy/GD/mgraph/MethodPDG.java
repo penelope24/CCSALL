@@ -15,7 +15,7 @@ import java.util.Set;
 public class MethodPDG extends AbstractProgramGraph<GraphNode, CFEdge> {
     public MethodDeclaration n;
     public MethodCFG mCFG;
-    public Set<Edge<GraphNode, CFEdge>> controlFlowEdges = new LinkedHashSet<>();
+    // extra edges
     public Set<Edge<GraphNode, DFEdge>> dataFlowEdges = new LinkedHashSet<>();
     public Set<Edge<GraphNode, CDEdge>> controlDepEdges = new LinkedHashSet<>();
     public Set<Edge<GraphNode, ASEdge>> astEdges = new LinkedHashSet<>();
@@ -25,7 +25,7 @@ public class MethodPDG extends AbstractProgramGraph<GraphNode, CFEdge> {
         this.n = mCFG.md;
         this.mCFG = mCFG;
         mCFG.copyVertexSet().forEach(this::addVertex);
-        controlFlowEdges.addAll(mCFG.copyEdgeSet());
+        mCFG.copyEdgeSet().forEach(this::addEdge);
     }
 
     @Override
