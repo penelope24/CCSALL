@@ -25,11 +25,11 @@ public class CFGCreator {
      * packageToAllType 当前package下所有的类的，接口等类型
      * imports 当前java文件所有的import的信息
      */
-    private List<GraphNode> allMethodsRootNode;
+    private List<GraphNode> CFGRootContainer;
     private HashMap<String,GraphNode> allNodesMap;
 
     public CFGCreator() {
-        allMethodsRootNode = new ArrayList<>();
+        CFGRootContainer = new ArrayList<>();
         allNodesMap = new HashMap<>();
     }
 
@@ -39,17 +39,14 @@ public class CFGCreator {
      * @param node 输入MethodDeclaration 节点
      * @return 返回这个方法体内部所有定义的方法：因为一个方法体内部可能有class的定义 class包含很多方法
      */
-    public List<GraphNode> buildMethodCFG(Node node) {
+    public GraphNode buildMethodCFG(Node node) {
         if (node instanceof MethodDeclaration) {
             MethodDeclaration methodDeclaration = ((MethodDeclaration) node).asMethodDeclaration();
             if(methodDeclaration.getParentNode().isPresent()) {
                 if (!(methodDeclaration.getParentNode().get() instanceof TypeDeclaration)) {
-                    return allMethodsRootNode; //专门针对于匿名对象 匿名对象的方法不处理
+                    return null; //专门针对于匿名对象 匿名对象的方法不处理
                 }
             }
-            System.out.println("********************************************");
-            System.out.println("当前正在生成CFG方法的名字：" + methodDeclaration.getDeclarationAsString(false,false,true));
-            System.out.println("********************************************");
             //创建方法名节点
             GraphNode graphNode = new GraphNode();
             graphNode.setOriginalCodeStr(methodDeclaration.getDeclarationAsString(false, true, true));
@@ -68,7 +65,7 @@ public class CFGCreator {
 
             Optional<BlockStmt> body = methodDeclaration.getBody();
             GraphNode tempNode = graphNode;
-            allMethodsRootNode.add(graphNode); //记录第一个入口
+            CFGRootContainer.add(graphNode); //记录第一个入口
             if (body.isPresent()) {
                 NodeList<Statement> statements = body.get().getStatements();
                 for (Statement statement : statements) {
@@ -83,12 +80,12 @@ public class CFGCreator {
             }
         }
         //二次过滤
-        for(GraphNode methodNode:allMethodsRootNode){
+        for(GraphNode methodNode: CFGRootContainer){
             buildCFG_2(methodNode);
         }
         //三次过滤
         buildCFG_3(node);
-        return allMethodsRootNode;
+        return CFGRootContainer.get(0);
     }
 
     /**

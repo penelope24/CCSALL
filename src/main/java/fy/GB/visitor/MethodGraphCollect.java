@@ -48,7 +48,7 @@ public class MethodGraphCollect extends VoidVisitorAdapter<List<MethodPDG>> {
                 System.out.println("parsing " + n.getNameAsString());
                 // build cfg
                 CFGCreator cfgCreator = new CFGCreator();
-                List<GraphNode> graphNodes = cfgCreator.buildMethodCFG(n);
+                GraphNode cfgRoot = cfgCreator.buildMethodCFG(n);
                 if (node_ast) {
                     // build ast
                     ASTCreater astCreater = new ASTCreater(cfgCreator.getAllNodesMap());
@@ -65,15 +65,16 @@ public class MethodGraphCollect extends VoidVisitorAdapter<List<MethodPDG>> {
                     simplifier.simplifyCFGNodeStr(n);
                 }
 
-                for (GraphNode node : graphNodes) {
-                    try {
-                        CFGBuild builder = new CFGBuild(n, dfgCreater.getAllDFGEdgesList(), prop);
-                        c.add(builder.buildGraph(node));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        System.out.println("输出方法文件失败："+n.getNameAsString());
-                    }
-                }
+//                for (GraphNode node : graphNodes) {
+//                    try {
+//                        CFGBuild builder = new CFGBuild(n, dfgCreater.getAllDFGEdgesList(), prop);
+//                        MethodPDG graph = builder.buildGraph(node);
+//                        c.add(builder.buildGraph(node));
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        System.out.println("输出方法文件失败："+n.getNameAsString());
+//                    }
+//                }
             }
         }
     }

@@ -129,81 +129,35 @@ public class GitWalk {
                     String path = PathUtils.getOldPath(fileDiff.diffEntry, repository);
                     if (path == null) return;
                     fileDiff.path1 = path;
-                    MethodGraphCollect collector = GBEntry.parse_file(path, pkg2types, prop);
-                    if (collector == null) return;
-                    try {
-                        CompilationUnit cu = StaticJavaParser.parse(new File(path));
-                        List<MethodDeclaration> mds = cu.findAll(MethodDeclaration.class);
-                        fileDiff.hunks.forEach(hunk -> {
-                            mds.stream()
-                                    .filter(md -> md.getRange().isPresent())
-                                    .filter(md -> md.getRange().get().contains(hunk.r1))
-                                    .findFirst().ifPresent(n -> hunk.n1 = n);
-                        });
-                        Set<MethodDeclaration> ns = fileDiff.hunks.stream()
-                                .map(hunk -> hunk.n1)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet());
-                        List<MethodPDG> graphs = new LinkedList<>();
-                        ns.forEach(n -> GBEntry.parse(n, collector, graphs));
-                        graphs.forEach(graph -> {
-                            List<Hunk> containedHunks = fileDiff.hunks.stream()
-                                    .filter(hunk -> hunk.n1 == graph.n)
-                                    .collect(Collectors.toList());
-                            containedHunks.forEach(h -> {
-                                h.graph1 = graph;
-                                commitDiff.ccMap.put(graph, h);
-                            });
-                        });
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                });
-            } catch (GitAPIException e) {
-                e.printStackTrace();
-            }
-        }
-        // v2
-        {
-            try {
-                jgit.checkout(commit.getId().name());
-                TOTAL_CHECKOUT_TIMES++;
-                HashMap<String, Set<String>> pkg2types = GBEntry.parse_project(projectPath);
-                commitDiff.fileDiffs.forEach(fileDiff -> {
-                    String path = PathUtils.getNewPath(fileDiff.diffEntry, repository);
-                    if (path == null) return;
-                    fileDiff.path2 = path;
-                    MethodGraphCollect collector = GBEntry.parse_file(path, pkg2types, prop);
-                    if (collector == null) return;
-                    try {
-                        CompilationUnit cu = StaticJavaParser.parse(new File(path));
-                        List<MethodDeclaration> mds = cu.findAll(MethodDeclaration.class);
-                        fileDiff.hunks.forEach(hunk -> {
-                            mds.stream()
-                                    .filter(md -> md.getRange().isPresent())
-                                    .filter(md -> md.getRange().get().contains(hunk.r2))
-                                    .findFirst().ifPresent(n -> hunk.n2 = n);
-                        });
-
-                        Set<MethodDeclaration> ns = fileDiff.hunks.stream()
-                                .map(hunk -> hunk.n2)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet());
-                        List<MethodPDG> graphs = new LinkedList<>();
-                        ns.forEach(n -> GBEntry.parse(n, collector, graphs));
-                        graphs.forEach(graph -> {
-                            List<Hunk> containedHunks = fileDiff.hunks.stream()
-                                    .filter(hunk -> hunk.n2 == graph.n)
-                                    .collect(Collectors.toList());
-                            containedHunks.forEach(h -> {
-                                h.graph2 = graph;
-                                commitDiff.ccMap.put(graph, h);
-                            });
-                        });
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
+//                    MethodGraphCollect collector = GBEntry.parse_file(path, pkg2types);
+//                    if (collector == null) return;
+//                    try {
+//                        CompilationUnit cu = StaticJavaParser.parse(new File(path));
+//                        List<MethodDeclaration> mds = cu.findAll(MethodDeclaration.class);
+//                        fileDiff.hunks.forEach(hunk -> {
+//                            mds.stream()
+//                                    .filter(md -> md.getRange().isPresent())
+//                                    .filter(md -> md.getRange().get().contains(hunk.r1))
+//                                    .findFirst().ifPresent(n -> hunk.n1 = n);
+//                        });
+//                        Set<MethodDeclaration> ns = fileDiff.hunks.stream()
+//                                .map(hunk -> hunk.n1)
+//                                .filter(Objects::nonNull)
+//                                .collect(Collectors.toSet());
+//                        List<MethodPDG> graphs = new LinkedList<>();
+//                        ns.forEach(n -> GBEntry.parse(n, collector, graphs));
+//                        graphs.forEach(graph -> {
+//                            List<Hunk> containedHunks = fileDiff.hunks.stream()
+//                                    .filter(hunk -> hunk.n1 == graph.n)
+//                                    .collect(Collectors.toList());
+//                            containedHunks.forEach(h -> {
+//                                h.graph1 = graph;
+//                                commitDiff.ccMap.put(graph, h);
+//                            });
+//                        });
+//                    } catch (FileNotFoundException e) {
+//                        e.printStackTrace();
+//                    }
                 });
             } catch (GitAPIException e) {
                 e.printStackTrace();

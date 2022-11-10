@@ -5,6 +5,7 @@ import fy.GD.edges.CDEdge;
 import fy.GD.mgraph.MethodPDG;
 import ghaffarian.graphs.Edge;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,16 +16,15 @@ public class SimplifiedCtrlDependencyTracker extends CtrlDependencyTracker{
     }
 
     public void track(GraphNode startNode, int limit) {
-        visiting.add(startNode);
-        while (--limit >= 0) {
-            GraphNode cur = visiting.pop();
-            Edge<GraphNode, CDEdge> parentCtrlDepEdge = graph.controlDepEdges.stream()
-                    .filter(e -> e.target == cur)
-                    .findFirst().orElse(null);
-            if (parentCtrlDepEdge != null) {
-                addEdge(parentCtrlDepEdge);
-                if (!visited.add(parentCtrlDepEdge)) {
-                    visiting.add(parentCtrlDepEdge.source);
+        GraphNode firstPar = startNode.getParentNode();
+        if (firstPar != null) {
+            visiting.add(firstPar);
+            while (!visiting.isEmpty() && --limit >= 0) {
+                GraphNode cur = visiting.pop();
+                ctrlBindNodes.add(cur);
+                GraphNode par = cur.getParentNode();
+                if (par != null && !visited.contains(par)) {
+                    visiting.add(par);
                 }
             }
         }

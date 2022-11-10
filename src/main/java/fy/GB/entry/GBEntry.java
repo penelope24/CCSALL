@@ -1,6 +1,7 @@
 package fy.GB.entry;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
+import fy.GB.visitor.GBVisitor;
 import fy.GB.visitor.MethodGraphCollect;
 import fy.GB.visitor.VarVisitor;
 import fy.GD.mgraph.MethodPDG;
@@ -17,7 +18,7 @@ public class GBEntry {
         return SolverEntry.solve_pkg2types(project);
     }
 
-    public static MethodGraphCollect parse_file(String javaFile, HashMap<String, Set<String>> pkg2types, Properties prop)  {
+    public static VarVisitor parse_file(String javaFile, HashMap<String, Set<String>> pkg2types)  {
         VarVisitor varVisitor = null;
         try {
             varVisitor = SolverEntry.solveVarTypesInFile(javaFile, pkg2types);
@@ -25,15 +26,19 @@ public class GBEntry {
             e.printStackTrace();
         }
         if (varVisitor == null) return null;
-        return new MethodGraphCollect(varVisitor, prop);
+        return varVisitor;
     }
 
     public static void parse(MethodDeclaration n, MethodGraphCollect collector, List<MethodPDG> graphs) {
         collector.visit(n, graphs);
     }
 
+    public static MethodPDG build (MethodDeclaration n, VarVisitor varVisitor) {
+        GBVisitor visitor = new GBVisitor(varVisitor);
+        return visitor.build(n);
+    }
+
     public static MethodPDG one_pass_parse(String project, String file, MethodDeclaration n) {
-        Properties prop = Config.loadProperties();
         HashMap<String, Set<String>> pkg2types = parse_project(project);
         VarVisitor varVisitor = null;
         try {
@@ -42,9 +47,7 @@ public class GBEntry {
             e.printStackTrace();
         }
         if (varVisitor == null) return null;
-        MethodGraphCollect collect = new MethodGraphCollect(varVisitor, prop);
-        List<MethodPDG> graphs = new ArrayList<>();
-        collect.visit(n, graphs);
-        return graphs.get(0);
+        GBVisitor visitor = new GBVisitor(varVisitor);
+        return visitor.build(n);
     }
 }

@@ -13,6 +13,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class MethodPDG extends AbstractProgramGraph<GraphNode, CFEdge> {
+    public String project;
+    public String javaFile;
     public MethodDeclaration n;
     public MethodCFG mCFG;
     // extra edges
