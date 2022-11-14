@@ -3,8 +3,8 @@ package fy.GB.visitor;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import fy.GB.entry.Config;
-import fy.GB.frontend.CFGBuild;
+import fy.GB.entry.GBConfig;
+import fy.GB.frontend.MethodPDGBuilder;
 import fy.GB.parse.ASTCreater;
 import fy.GB.parse.CFGCreator;
 import fy.GB.parse.CFGNodeSimplifier;
@@ -13,20 +13,19 @@ import fy.GD.basic.DFVarNode;
 import fy.GD.basic.GraphNode;
 import fy.GD.mgraph.MethodPDG;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
-public class GBVisitor {
+public class MethodVisitor {
 
     private final Set<String> package2types;
     private final List<String> imports;
     private final Set<DFVarNode> fields;
-    private Properties prop = Config.loadProperties();
+    private Properties prop = GBConfig.loadProperties();
 
-    public GBVisitor(VarVisitor varVisitor) {
+    public MethodVisitor(VarVisitor varVisitor) {
         this.package2types = varVisitor.getCurrentPackageAllTypes();
         this.imports = varVisitor.getAllImports();
         this.fields = varVisitor.getAllFields();
@@ -57,7 +56,7 @@ public class GBVisitor {
             CFGNodeSimplifier simplifier = new CFGNodeSimplifier(cfgCreator.getAllNodesMap(), package2types, imports, fields);
             simplifier.simplifyCFGNodeStr(n);
         }
-        CFGBuild builder = new CFGBuild(n, dfgCreater.getAllDFGEdgesList(), prop);
+        MethodPDGBuilder builder = new MethodPDGBuilder(n, dfgCreater.getAllDFGEdgesList(), prop);
         return builder.buildGraph(cfgRoot);
     }
 }

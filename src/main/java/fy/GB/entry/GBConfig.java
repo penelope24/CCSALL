@@ -3,7 +3,7 @@ package fy.GB.entry;
 import java.io.*;
 import java.util.Properties;
 
-public class Config {
+public class GBConfig {
 
     public static void setProperties() {
         try (OutputStream os = new FileOutputStream("src/main/resources/graph.properties")) {
@@ -36,6 +36,6 @@ public class Config {
     }
 
     public static void main(String[] args) {
-        Config.setProperties();
+        GBConfig.setProperties();
     }
 }

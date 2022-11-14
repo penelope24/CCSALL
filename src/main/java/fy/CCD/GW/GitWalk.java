@@ -1,18 +1,13 @@
 package fy.CCD.GW;
 
 
-import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import fy.CCD.GW.data.CommitDiff;
 import fy.CCD.GW.data.FileDiff;
 import fy.CCD.GW.data.Hunk;
 import fy.CCD.GW.utils.JGitUtils;
 import fy.CCD.GW.utils.PathUtils;
 import fy.GB.entry.GBEntry;
-import fy.GB.entry.Config;
-import fy.GB.visitor.MethodGraphCollect;
-import fy.GD.mgraph.MethodPDG;
+import fy.GB.entry.GBConfig;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.EditList;
@@ -44,7 +39,7 @@ public class GitWalk {
     int TOTAL_CHECKOUT_TIMES = 0;
     int TOTAL_COMMIT_DIFF_CREATE_TIMES = 0;
     // graph properties
-    Properties prop = Config.loadProperties();
+    Properties prop = GBConfig.loadProperties();
 
     public GitWalk(String projectPath) {
         this.projectPath = projectPath;

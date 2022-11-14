@@ -13,6 +13,7 @@ import java.util.Set;
 
 public class DataDependencyTracker extends DependencyTracker {
     public MethodPDG graph;
+    public int MAX_DATA_DEPTH = 3; // default
     public Deque<Edge<GraphNode, DFEdge>> visiting = new ArrayDeque<>();
     public Deque<Edge<GraphNode, DFEdge>> visited = new ArrayDeque<>();
     public Set<GraphNode> dataBindNodes = new LinkedHashSet<>();
@@ -39,5 +40,9 @@ public class DataDependencyTracker extends DependencyTracker {
 
     public Set<Edge<GraphNode, DFEdge>> getDataBindEdges() {
         return dataBindEdges;
+    }
+
+    public void setMAX_DATA_DEPTH(int MAX_DATA_DEPTH) {
+        this.MAX_DATA_DEPTH = MAX_DATA_DEPTH;
     }
 }

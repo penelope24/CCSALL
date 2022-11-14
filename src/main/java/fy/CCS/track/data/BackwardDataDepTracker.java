@@ -13,9 +13,13 @@ import java.util.stream.Collectors;
 
 public class BackwardDataDepTracker extends DataDependencyTracker{
 
-
     public BackwardDataDepTracker(MethodPDG graph) {
         super(graph);
+    }
+
+    public BackwardDataDepTracker(MethodPDG graph, int depth) {
+        super(graph);
+        this.MAX_DATA_DEPTH = depth;
     }
 
     public void track(GraphNode startNode) {
@@ -25,10 +29,10 @@ public class BackwardDataDepTracker extends DataDependencyTracker{
         Set<Edge<GraphNode, DFEdge>> instantDataBindEdges = graph.dataFlowEdges.stream()
                 .filter(e -> e.target == startNode)
                 .collect(Collectors.toSet());
-        addEdges(instantDataBindEdges);
+//        addEdges(instantDataBindEdges);
         // bfs
         visiting.addAll(instantDataBindEdges);
-        while (!visiting.isEmpty()) {
+        while (!visiting.isEmpty() && --MAX_DATA_DEPTH >= 0) {
             Edge<GraphNode, DFEdge> curEdge = visiting.pop();
             GraphNode curNode = curEdge.source;
             dataBindNodes.add(curNode);
@@ -42,5 +46,4 @@ public class BackwardDataDepTracker extends DataDependencyTracker{
             }
         }
     }
-
 }

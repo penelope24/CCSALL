@@ -9,18 +9,18 @@ import fy.GD.edges.DFEdge;
 import fy.GD.mgraph.MethodCFG;
 import fy.GD.mgraph.MethodPDG;
 import ghaffarian.graphs.Edge;
-import ghaffarian.progex.graphs.pdg.DDEdge;
+
 
 import java.util.*;
 
-public class CFGBuild {
+public class MethodPDGBuilder {
     private MethodDeclaration n;
     private int index = 0; //表示节点的编号开始值
     private List<String> leafNodes;
     private Set<GraphEdge> allDFGEdgesList;
     private Properties prop;
 
-    public CFGBuild(MethodDeclaration n, Set<GraphEdge> allDFGEdgesList, Properties prop) {
+    public MethodPDGBuilder(MethodDeclaration n, Set<GraphEdge> allDFGEdgesList, Properties prop) {
         this.leafNodes = new ArrayList<>();
         this.allDFGEdgesList = allDFGEdgesList;
         this.prop = prop;
@@ -41,7 +41,7 @@ public class CFGBuild {
             else {
                 parIndexNum = "n" + (index++);
                 par.setDotNum(parIndexNum);
-                String label = DotPrintFilter.filterQuotation(par.getOriginalCodeStr());
+                String label = DotStrFilter.filterQuotation(par.getOriginalCodeStr());
                 int line = par.getCodeLineNum();
                 par.setSimplifyCodeStr(label);
                 par.setCodeLineNum(line);
@@ -60,7 +60,7 @@ public class CFGBuild {
                     dealingNodes.add(child);
                     child.setDotNum("n" + (index));
                     index++;
-                    String label = DotPrintFilter.filterQuotation(child.getOriginalCodeStr());
+                    String label = DotStrFilter.filterQuotation(child.getOriginalCodeStr());
                     child.setSimplifyCodeStr(label);
                     mCFG.addVertex(child);
 //                    if(astFlag) {

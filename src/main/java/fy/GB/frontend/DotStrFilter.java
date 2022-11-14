@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  * 比如: 字符串中的引号
  * 这个工具就是用来过滤这些噪音的
  */
-public class DotPrintFilter {
+public class DotStrFilter {
     private static Pattern p;
     private static Pattern dotP;
     private static Pattern quotationP;

@@ -13,20 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-public class SolverEntry {
-
-//    public static HashMap<String, Set<String>> solve_pkg2types(List<String> projects) {
-//        List<String> allJavaFiles = new ArrayList<>();
-//        projects.forEach(project -> {
-//            // find java files
-//            new SubFileFinder((level, path, file) -> path.endsWith(".java"), (level, path, file) -> {
-//                allJavaFiles.add(file.getAbsolutePath());
-//            }).explore(new File(project));
-//        });
-//        TypeSolver typeSolver = new TypeSolver();
-//        typeSolver.collect(allJavaFiles);
-//        return typeSolver.getPackage2types();
-//    }
+public class TypeSolverEntry {
 
     public static HashMap<String, Set<String>> solve_pkg2types(String project) {
         List<String> allJavaFiles = new ArrayList<>();
@@ -34,12 +21,6 @@ public class SolverEntry {
         allJavaFiles = SubFileFinder.findAllJavaFiles(project);
         TypeSolver typeSolver = new TypeSolver();
         typeSolver.collect(allJavaFiles);
-        return typeSolver.getPackage2types();
-    }
-
-    public static HashMap<String, Set<String>> solve_pkg2types(List<String> javaFiles) {
-        TypeSolver typeSolver = new TypeSolver();
-        typeSolver.collect(javaFiles);
         return typeSolver.getPackage2types();
     }
 

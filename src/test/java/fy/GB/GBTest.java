@@ -4,7 +4,6 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import fy.GB.entry.GBEntry;
-import fy.GB.visitor.GBVisitor;
 import fy.GD.mgraph.MethodPDG;
 import fy.GD.mgraph.MethodPDGExporter;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,10 +20,16 @@ public class GBTest {
     @BeforeEach
     void init_a_graph() throws FileNotFoundException {
         String project = "/Users/fy/Documents/MyProjects/slicing_cases";
-        String file = "/Users/fy/Documents/MyProjects/slicing_cases/custom_slice_cases/basic/case1.java";
+        String file = "/Users/fy/Documents/MyProjects/slicing_cases/custom_slice_cases/basic/case2.java";
         CompilationUnit cu = StaticJavaParser.parse(new File(file));
         n = cu.findFirst(MethodDeclaration.class).get();
         graph = GBEntry.one_pass_parse(project, file, n);
+
+    }
+
+    @Test
+    void print() {
+        MethodPDGExporter.export(graph, output + "/case2.dot");
     }
 
 

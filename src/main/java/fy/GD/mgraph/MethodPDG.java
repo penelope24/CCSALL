@@ -17,6 +17,7 @@ public class MethodPDG extends AbstractProgramGraph<GraphNode, CFEdge> {
     public String javaFile;
     public MethodDeclaration n;
     public MethodCFG mCFG;
+    public GraphNode root;
     // extra edges
     public Set<Edge<GraphNode, DFEdge>> dataFlowEdges = new LinkedHashSet<>();
     public Set<Edge<GraphNode, CDEdge>> controlDepEdges = new LinkedHashSet<>();
@@ -28,6 +29,13 @@ public class MethodPDG extends AbstractProgramGraph<GraphNode, CFEdge> {
         this.mCFG = mCFG;
         mCFG.copyVertexSet().forEach(this::addVertex);
         mCFG.copyEdgeSet().forEach(this::addEdge);
+        this.root = findRootNode(mCFG);
+    }
+
+    public GraphNode findRootNode (MethodCFG mCFG) {
+        return mCFG.copyVertexSet().stream()
+                .filter(node -> node.getParentNode() == null)
+                .findFirst().orElse(null);
     }
 
     @Override

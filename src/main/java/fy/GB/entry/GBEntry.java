@@ -1,8 +1,7 @@
 package fy.GB.entry;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
-import fy.GB.visitor.GBVisitor;
-import fy.GB.visitor.MethodGraphCollect;
+import fy.GB.visitor.MethodVisitor;
 import fy.GB.visitor.VarVisitor;
 import fy.GD.mgraph.MethodPDG;
 
@@ -15,13 +14,13 @@ import java.util.*;
 public class GBEntry {
 
     public static HashMap<String, Set<String>> parse_project(String project) {
-        return SolverEntry.solve_pkg2types(project);
+        return TypeSolverEntry.solve_pkg2types(project);
     }
 
     public static VarVisitor parse_file(String javaFile, HashMap<String, Set<String>> pkg2types)  {
         VarVisitor varVisitor = null;
         try {
-            varVisitor = SolverEntry.solveVarTypesInFile(javaFile, pkg2types);
+            varVisitor = TypeSolverEntry.solveVarTypesInFile(javaFile, pkg2types);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -29,12 +28,9 @@ public class GBEntry {
         return varVisitor;
     }
 
-    public static void parse(MethodDeclaration n, MethodGraphCollect collector, List<MethodPDG> graphs) {
-        collector.visit(n, graphs);
-    }
 
     public static MethodPDG build (MethodDeclaration n, VarVisitor varVisitor) {
-        GBVisitor visitor = new GBVisitor(varVisitor);
+        MethodVisitor visitor = new MethodVisitor(varVisitor);
         return visitor.build(n);
     }
 
@@ -42,12 +38,15 @@ public class GBEntry {
         HashMap<String, Set<String>> pkg2types = parse_project(project);
         VarVisitor varVisitor = null;
         try {
-            varVisitor = SolverEntry.solveVarTypesInFile(file, pkg2types);
+            varVisitor = TypeSolverEntry.solveVarTypesInFile(file, pkg2types);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         if (varVisitor == null) return null;
-        GBVisitor visitor = new GBVisitor(varVisitor);
-        return visitor.build(n);
+        MethodVisitor visitor = new MethodVisitor(varVisitor);
+        MethodPDG graph = visitor.build(n);
+        graph.javaFile = file;
+        graph.project = project;
+        return graph;
     }
 }
