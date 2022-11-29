@@ -1,13 +1,22 @@
 package fy.CCD.GW;
 
 
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import fy.CCD.GW.data.CommitDiff;
 import fy.CCD.GW.data.FileDiff;
 import fy.CCD.GW.data.Hunk;
+import fy.CCD.GW.utils.HKHelper;
 import fy.CCD.GW.utils.JGitUtils;
 import fy.CCD.GW.utils.PathUtils;
-import fy.GB.entry.GBEntry;
-import fy.GB.entry.GBConfig;
+import fy.CCS.slicing.PDGBuilder;
+import fy.CCS.slicing.SrcCodeTransformer;
+import fy.CCS.track.DTEntry;
+import fy.GB.entry.TypeSolverEntry;
+import fy.GB.visitor.VarVisitor;
+import fy.GD.mgraph.MethodPDG;
+import fy.jp.JPHelper;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.EditList;
@@ -25,21 +34,22 @@ public class GitWalk {
     String projectPath;
     Repository repository;
     JGitUtils jgit;
-    String outputPath = "/Users/fy/Documents/fyJavaProjects/CCData/src/test/resources";
+    // output
+    boolean log = false;
+    BufferedWriter logger = null;
+    String logPath = "";
+    String outputBase = "";
     // configure
     int MAX_ENTRY_SIZE = 100;
     int MAX_HUNKS = 20;
-    // output
+    int K_ctrl = 2;
+    int a = 3;
+    // result
     public List<RevCommit> allCommits = new ArrayList<>();
     public List<CommitDiff> commitDiffs = new LinkedList<>();
     // running stats
-    int count = 0;
-    int PDG_BUILD_SUCC = 0;
     int PDG_BUILD_ERR = 0;
-    int TOTAL_CHECKOUT_TIMES = 0;
-    int TOTAL_COMMIT_DIFF_CREATE_TIMES = 0;
-    // graph properties
-    Properties prop = GBConfig.loadProperties();
+    int SLICING_ERR = 0;
 
     public GitWalk(String projectPath) {
         this.projectPath = projectPath;
@@ -63,33 +73,48 @@ public class GitWalk {
     }
 
     public void walk() {
-        allCommits.forEach(commit -> {
-            CommitDiff commitDiff = solve(commit);
-            if (commitDiff != null) {
-                commitDiffs.add(commitDiff);
+        if (log) {
+            allCommits.forEach(commit -> commitDiffs.add(solve(commit, logger)));
+            try {
+                logger.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        });
+        }
+        else {
+            allCommits.forEach(commit -> commitDiffs.add(solve(commit, null)));
+        }
     }
 
     public void walk(int num) {
-        allCommits.subList(0, num).forEach(commit -> {
-            CommitDiff commitDiff = solve(commit);
-            if (commitDiff != null) {
-                commitDiffs.add(commitDiff);
+        if (log) {
+            allCommits.subList(0, num).forEach(commit -> commitDiffs.add(solve(commit, logger)));
+            try {
+                logger.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        });
+        }
+        else {
+            allCommits.subList(0, num).forEach(commit -> commitDiffs.add(solve(commit, null)));
+        }
     }
 
     public void walk(int s, int t) {
-        allCommits.subList(s, t).forEach(commit -> {
-            CommitDiff commitDiff = solve(commit);
-            if (commitDiff != null) {
-                commitDiffs.add(commitDiff);
+        if (log) {
+            allCommits.subList(s, t).forEach(commit -> commitDiffs.add(solve(commit, logger)));
+            try {
+                logger.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        });
+        }
+        else {
+            allCommits.subList(s, t).forEach(commit -> commitDiffs.add(solve(commit, null)));
+        }
     }
 
-    public CommitDiff solve (RevCommit commit)  {
+    public CommitDiff solve (RevCommit commit, BufferedWriter logger) {
         RevCommit par = JGitUtils.findFirstParent(repository, commit);
         if (par == null) return null;
         List<DiffEntry> diffEntries = null;
@@ -99,17 +124,21 @@ public class GitWalk {
             e.printStackTrace();
         }
         if (diffEntries == null || diffEntries.isEmpty() || diffEntries.size() > MAX_ENTRY_SIZE) return null;
-        CommitDiff commitDiff = new CommitDiff(repository, par.getId().name(), commit.getId().name());
-        TOTAL_COMMIT_DIFF_CREATE_TIMES++;
+        CommitDiff commitDiff = new CommitDiff(commit, repository, par.getId().name(), commit.getId().name());
         commitDiff.fileDiffs = diffEntries.stream()
                 .map(FileDiff::new)
                 .collect(Collectors.toList());
         commitDiff.fileDiffs.forEach(fileDiff -> {
             try {
                 EditList edits = JGitUtils.getEditList(repository, fileDiff.diffEntry);
-                fileDiff.hunks = edits.stream()
+                if (edits.size() > MAX_HUNKS) return;
+                edits.stream()
                         .map(Hunk::new)
-                        .collect(Collectors.toList());
+                        .forEach(hunk -> {
+                            hunk.commitDiff = commitDiff;
+                            hunk.fileDiff = fileDiff;
+                            fileDiff.hunks.add(hunk);
+                        });
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -118,41 +147,93 @@ public class GitWalk {
         {
             try {
                 jgit.checkout(par.getId().name());
-                TOTAL_CHECKOUT_TIMES++;
-                HashMap<String, Set<String>> pkg2types = GBEntry.parse_project(projectPath);
+                HashMap<String, Set<String>> pkg2types = TypeSolverEntry.solve_pkg2types(projectPath);
                 commitDiff.fileDiffs.forEach(fileDiff -> {
                     String path = PathUtils.getOldPath(fileDiff.diffEntry, repository);
                     if (path == null) return;
                     fileDiff.path1 = path;
-//                    MethodGraphCollect collector = GBEntry.parse_file(path, pkg2types);
-//                    if (collector == null) return;
-//                    try {
-//                        CompilationUnit cu = StaticJavaParser.parse(new File(path));
-//                        List<MethodDeclaration> mds = cu.findAll(MethodDeclaration.class);
-//                        fileDiff.hunks.forEach(hunk -> {
-//                            mds.stream()
-//                                    .filter(md -> md.getRange().isPresent())
-//                                    .filter(md -> md.getRange().get().contains(hunk.r1))
-//                                    .findFirst().ifPresent(n -> hunk.n1 = n);
-//                        });
-//                        Set<MethodDeclaration> ns = fileDiff.hunks.stream()
-//                                .map(hunk -> hunk.n1)
-//                                .filter(Objects::nonNull)
-//                                .collect(Collectors.toSet());
-//                        List<MethodPDG> graphs = new LinkedList<>();
-//                        ns.forEach(n -> GBEntry.parse(n, collector, graphs));
-//                        graphs.forEach(graph -> {
-//                            List<Hunk> containedHunks = fileDiff.hunks.stream()
-//                                    .filter(hunk -> hunk.n1 == graph.n)
-//                                    .collect(Collectors.toList());
-//                            containedHunks.forEach(h -> {
-//                                h.graph1 = graph;
-//                                commitDiff.ccMap.put(graph, h);
-//                            });
-//                        });
-//                    } catch (FileNotFoundException e) {
-//                        e.printStackTrace();
-//                    }
+                    VarVisitor varVisitor = TypeSolverEntry.solveVarTypesInFile(path, pkg2types);
+                    CompilationUnit cu = JPHelper.getCompilationUnit(path);
+                    cu.findAll(MethodDeclaration.class).forEach(n -> n.getRange().ifPresent(r -> {
+                        Set<Hunk> insideHunks = fileDiff.hunks.stream()
+                                .filter(hunk -> r.contains(hunk.r1))
+                                .collect(Collectors.toSet());
+                        if (!insideHunks.isEmpty()) {
+                            try {
+                                PDGBuilder builder = new PDGBuilder(pkg2types, varVisitor);
+                                MethodPDG graph = builder.build(n);
+                                MethodDeclaration cloned = n.clone();
+                                Optional<Node> parOpt = n.getParentNode();
+                                int K_data = (graph.vertexCount() / a) + 1;
+                                insideHunks.forEach(hunk -> {
+                                    List<Integer> chLines = hunk.getRemLines();
+                                    if (!chLines.isEmpty()) {
+                                        Set<Integer> reservedLines = DTEntry.dependencyTrack(graph, chLines, K_data, K_ctrl);
+                                        MethodDeclaration n2 = SrcCodeTransformer.slice(cloned, reservedLines);
+                                        parOpt.ifPresent(n2::setParentNode);
+                                        hunk.slice1 = builder.build(n2);
+                                        if (hunk.slice1 == null) SLICING_ERR++;
+                                        hunk.n1 = n;
+                                        hunk.graph1 = graph;
+                                        if (this.log) {
+                                            HKHelper.output1(outputBase, hunk, logger);
+                                        }
+                                    }
+                                });
+                            }
+                            catch (Exception e) {
+                                PDG_BUILD_ERR++;
+                            }
+                        }
+                    }));
+                });
+            } catch (GitAPIException e) {
+                e.printStackTrace();
+            }
+        }
+        // v2
+        {
+            try {
+                jgit.checkout(commit.getId().name());
+                HashMap<String, Set<String>> pkg2types = TypeSolverEntry.solve_pkg2types(projectPath);
+                commitDiff.fileDiffs.forEach(fileDiff -> {
+                    String path = PathUtils.getNewPath(fileDiff.diffEntry, repository);
+                    if (path == null) return;
+                    fileDiff.path2 = path;
+                    VarVisitor varVisitor = TypeSolverEntry.solveVarTypesInFile(path, pkg2types);
+                    CompilationUnit cu = JPHelper.getCompilationUnit(path);
+                    cu.findAll(MethodDeclaration.class).forEach(n -> n.getRange().ifPresent(r -> {
+                        Set<Hunk> insideHunks = fileDiff.hunks.stream()
+                                .filter(hunk -> r.contains(hunk.r2))
+                                .collect(Collectors.toSet());
+                        if (!insideHunks.isEmpty()) {
+                            try {
+                                PDGBuilder builder = new PDGBuilder(pkg2types, varVisitor);
+                                MethodPDG graph = builder.build(n);
+                                MethodDeclaration cloned = n.clone();
+                                Optional<Node> parOpt = n.getParentNode();
+                                int K_data = (graph.vertexCount() / a) + 1;
+                                insideHunks.forEach(hunk -> {
+                                    List<Integer> chLines = hunk.getAddLines();
+                                    if (!chLines.isEmpty()) {
+                                        Set<Integer> reservedLines = DTEntry.dependencyTrack(graph, chLines, K_data, K_ctrl);
+                                        MethodDeclaration n2 = SrcCodeTransformer.slice(cloned, reservedLines);
+                                        parOpt.ifPresent(n2::setParentNode);
+                                        hunk.slice2 = builder.build(n2);
+                                        if (hunk.slice2 == null) SLICING_ERR++;
+                                        hunk.n2 = n;
+                                        hunk.graph2 = graph;
+                                        if (this.log) {
+                                            HKHelper.output2(outputBase, hunk, logger);
+                                        }
+                                    }
+                                });
+                            }
+                            catch (Exception e) {
+                                PDG_BUILD_ERR++;
+                            }
+                        }
+                    }));
                 });
             } catch (GitAPIException e) {
                 e.printStackTrace();
@@ -162,55 +243,52 @@ public class GitWalk {
     }
 
     public void check() {
-        System.out.println(TOTAL_CHECKOUT_TIMES);
-        System.out.println(TOTAL_COMMIT_DIFF_CREATE_TIMES);
-        System.out.println(commitDiffs.size());
-        List<CommitDiff> validCommitDiffs = commitDiffs.stream()
+        System.out.println("pdg build fails: " + PDG_BUILD_ERR);
+        System.out.println("slicing fails: " + SLICING_ERR);
+        System.out.println("total commit diffs: " + commitDiffs.size());
+        Set<CommitDiff> validCommitDiffs = commitDiffs.stream()
+                .filter(Objects::nonNull)
                 .filter(CommitDiff::is_valid)
-                .collect(Collectors.toList());
-        System.out.println(validCommitDiffs.size());
+                .collect(Collectors.toSet());
+        System.out.println("total valid commit diffs: " + validCommitDiffs.size());
+        Set<Hunk> totalHunkSet = new HashSet<>();
+        validCommitDiffs.forEach(commitDiff -> totalHunkSet.addAll(commitDiff.getValidHunks()));
+        System.out.println("total valid hunk set size: " + totalHunkSet.size());
+        List<Hunk> totalHunkList = new ArrayList<>();
+        validCommitDiffs.forEach(commitDiff -> totalHunkList.addAll(commitDiff.getValidHunks()));
+        System.out.println("total valid hunk set size: " + totalHunkList.size());
     }
 
-    public void log(String logFile) throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(logFile)));
-        List<CommitDiff> validCommitDiffs = commitDiffs.stream()
-                .filter(CommitDiff::is_valid)
-                .collect(Collectors.toList());
-        validCommitDiffs.forEach(commitDiff -> {
-            try {
-                bw.write("current version: " + commitDiff.v2);
-                bw.newLine();
-                commitDiff.fileDiffs.forEach(fileDiff -> {
-                    try {
-                        bw.write("changed file : " + commitDiff.fileDiffs.indexOf(fileDiff));
-                        bw.newLine();
-                        fileDiff.hunks.forEach(hunk -> {
-                            try {
-                                bw.write(" hunk " + fileDiff.hunks.indexOf(hunk));
-                                bw.newLine();
-                                boolean exist1 = hunk.graph1 != null;
-                                bw.write("graph 1: " + exist1);
-                                bw.newLine();
-                                boolean exist2 = hunk.graph2 != null;
-                                bw.write("graph 2: " + exist2);
-                                bw.newLine();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        });
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-                bw.newLine();
-                bw.newLine();
-                bw.newLine();
-                bw.newLine();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        bw.close();
+
+
+    public void setLogger(String logPath) {
+        this.log = true;
+        this.logPath = logPath;
+        try {
+            this.logger = new BufferedWriter(new FileWriter(new File(logPath)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    public GitWalk setOutputBase(String outputBase) {
+        this.outputBase = outputBase;
+        return this;
+    }
+
+    public void setMAX_ENTRY_SIZE(int MAX_ENTRY_SIZE) {
+        this.MAX_ENTRY_SIZE = MAX_ENTRY_SIZE;
+    }
+
+    public void setMAX_HUNKS(int MAX_HUNKS) {
+        this.MAX_HUNKS = MAX_HUNKS;
+    }
+
+    public void setK_ctrl(int k_ctrl) {
+        K_ctrl = k_ctrl;
+    }
+
+    public void setA(int a) {
+        this.a = a;
+    }
 }

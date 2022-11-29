@@ -1,8 +1,0 @@
-digraph SLICE_{
-  v1  [label="11:  boolean analog()"];
-  v2  [label="11:  try"];
-  v3  [label="11:  return a"];
-  v1 -> v2  [label=""];
-  v2 -> v3  [label=""];
-   // end-of-graph
-}

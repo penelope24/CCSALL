@@ -3,9 +3,9 @@ package fy.GB;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import fy.GB.entry.GBEntry;
+import fy.CCS.slicing.PDGBuilder;
 import fy.GD.mgraph.MethodPDG;
-import fy.GD.mgraph.MethodPDGExporter;
+import fy.GD.export.ExpEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +23,13 @@ public class GBTest {
         String file = "/Users/fy/Documents/MyProjects/slicing_cases/custom_slice_cases/basic/case2.java";
         CompilationUnit cu = StaticJavaParser.parse(new File(file));
         n = cu.findFirst(MethodDeclaration.class).get();
-        graph = GBEntry.one_pass_parse(project, file, n);
+        graph = PDGBuilder.one_pass_parse(project, file, n);
 
     }
 
     @Test
     void print() {
-        MethodPDGExporter.export(graph, output + "/case2.dot");
+        ExpEntry.exportDot(graph, output + "/case2.dot");
     }
 
 

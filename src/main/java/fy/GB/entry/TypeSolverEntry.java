@@ -24,9 +24,14 @@ public class TypeSolverEntry {
         return typeSolver.getPackage2types();
     }
 
-    public static VarVisitor solveVarTypesInFile(String javaFile, HashMap<String, Set<String>> pkg2types)
-            throws FileNotFoundException {
-        CompilationUnit cu = StaticJavaParser.parse(new File(javaFile));
+    public static VarVisitor solveVarTypesInFile(String javaFile, HashMap<String, Set<String>> pkg2types) {
+        CompilationUnit cu = null;
+        try {
+            cu = StaticJavaParser.parse(new File(javaFile));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
         VarVisitor varVisitor = new VarVisitor(pkg2types, cu);
         varVisitor.analyseFieldTypes();
         return varVisitor;

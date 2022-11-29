@@ -18,14 +18,12 @@ public class SimplifiedCtrlDependencyTracker extends CtrlDependencyTracker{
     public void track(GraphNode startNode, int limit) {
         GraphNode firstPar = startNode.getParentNode();
         if (firstPar != null) {
-            // add first
-            ctrlBindNodes.add(firstPar);
-            limit--;
             // bfs
             visiting.add(firstPar);
-            while (!visiting.isEmpty() && --limit >= 0) {
+            while (!visiting.isEmpty() && limit > 0) {
                 GraphNode cur = visiting.pop();
                 ctrlBindNodes.add(cur);
+                limit--;
                 GraphNode par = cur.getParentNode();
                 if (par != null && !visited.contains(par)) {
                     visiting.add(par);

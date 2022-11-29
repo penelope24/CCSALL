@@ -4,23 +4,19 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
-import com.github.javaparser.ast.nodeTypes.NodeWithCondition;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.Node.PreOrderIterator;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.swing.text.html.Option;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SrcCodeTransformer {
 
-    public static MethodDeclaration slice (MethodDeclaration n, List<Integer> reserved) {
-        Set<BlockStmt> modifiedBlocks = new HashSet<>();
+    public static MethodDeclaration slice (MethodDeclaration n, Set<Integer> reserved) {
+        List<BlockStmt> traversedBlocks = new ArrayList<>();
         Map<Statement, Integer> removedStmtIndexMap = new HashMap<>();
-        PreOrderIterator iterator = new PreOrderIterator(n);
+        Node.BreadthFirstIterator iterator = new Node.BreadthFirstIterator(n);
         while (iterator.hasNext()) {
             Node node = iterator.next();
             if (node instanceof BlockStmt) {
@@ -37,7 +33,7 @@ public class SrcCodeTransformer {
                     }
                     idx++;
                 }
-                modifiedBlocks.add(clonedBlock);
+                traversedBlocks.add(clonedBlock);
             }
         }
 
@@ -45,7 +41,7 @@ public class SrcCodeTransformer {
         Map<BlockStmt, Integer> parBlockMap = new HashMap<>();
         Map<BlockStmt, Node> containingStmtMap = new HashMap<>();
         Map<Pair<BlockStmt, Integer>, Integer> indexMap = new HashMap<>();
-        modifiedBlocks.forEach(modified -> {
+        traversedBlocks.forEach(modified -> {
             BlockStmt original = findOriginalBlock(n, modified);
             if (original != null) {
                 originalMap.put(modified, original);
@@ -64,7 +60,7 @@ public class SrcCodeTransformer {
             }
         });
 
-        for (BlockStmt b : modifiedBlocks) {
+        for (BlockStmt b : traversedBlocks) {
             if (!is_valid(b, reserved)) continue;
             if (parBlockMap.containsKey(b)) {
                 int parBlockLine = parBlockMap.get(b);
@@ -86,14 +82,6 @@ public class SrcCodeTransformer {
                 }
             }
         }
-
-//        for (BlockStmt b : modifiedBlocks) {
-//            Node containingNode = containingStmtMap.get(b);
-//            BlockStmt oriBlock = originalMap.get(b);
-//            if (containingNode != null && oriBlock != null) {
-//                containingNode.replace(oriBlock, b);
-//            }
-//        }
 
         Node.BreadthFirstIterator iterator2 = new Node.BreadthFirstIterator(n);
         while (iterator2.hasNext()) {
@@ -122,7 +110,7 @@ public class SrcCodeTransformer {
                 .findFirst().orElse(null);
     }
 
-    public static BlockStmt findValidParentBlock(BlockStmt block, List<Integer> reserved) {
+    public static BlockStmt findValidParentBlock(BlockStmt block, Set<Integer> reserved) {
         Deque<Node> visiting = new ArrayDeque<>();
         Node parentNode = block.getParentNode().get();
         visiting.add(parentNode);
@@ -180,7 +168,7 @@ public class SrcCodeTransformer {
 
 
 
-    public static boolean is_valid(Statement stmt, List<Integer> reserved) {
+    public static boolean is_valid(Statement stmt, Set<Integer> reserved) {
         Optional<Range> rOptional = stmt.getRange();
         if (rOptional.isEmpty()) {
             return false;
@@ -189,10 +177,10 @@ public class SrcCodeTransformer {
         return reserved.contains(line);
     }
 
-    public static void print(Statement statement) {
-        System.out.println(statement.getClass());
-        System.out.println(statement.getBegin().get().line);
-        System.out.println("---------");
+    public static void print(Node node) {
+       System.out.println(node.getClass());
+       System.out.println(node.getRange().get().begin.line);
+       System.out.println("----------------");
     }
 
     public static int getNodeLineNum(Node node) {
