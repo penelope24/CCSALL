@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Hunk {
+    public CommitDiff commitDiff;
+    public FileDiff fileDiff;
     public Edit edit;
     public Edit.Type type;
     public Range r1;
@@ -22,8 +24,8 @@ public class Hunk {
     public MethodPDG graph2;
     public MethodPDG slice1;
     public MethodPDG slice2;
-    public FileDiff fileDiff;
-    public CommitDiff commitDiff;
+
+
 
     public Hunk(Edit edit) {
         this.edit = edit;

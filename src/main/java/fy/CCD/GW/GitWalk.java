@@ -7,10 +7,12 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import fy.CCD.GW.data.CommitDiff;
 import fy.CCD.GW.data.FileDiff;
 import fy.CCD.GW.data.Hunk;
+import fy.CCD.GW.data.MethodDiff;
 import fy.CCD.GW.utils.HKHelper;
 import fy.CCD.GW.utils.JGitUtils;
 import fy.CCD.GW.utils.PathUtils;
 import fy.CCS.slicing.PDGBuilder;
+import fy.CCS.slicing.Slicer;
 import fy.CCS.slicing.SrcCodeTransformer;
 import fy.CCS.track.DTEntry;
 import fy.GB.entry.TypeSolverEntry;
@@ -179,6 +181,120 @@ public class GitWalk {
                                             HKHelper.output1(outputBase, hunk, logger);
                                         }
                                     }
+                                });
+                            }
+                            catch (Exception e) {
+                                PDG_BUILD_ERR++;
+                            }
+                        }
+                    }));
+                });
+            } catch (GitAPIException e) {
+                e.printStackTrace();
+            }
+        }
+        // v2
+        {
+            try {
+                jgit.checkout(commit.getId().name());
+                HashMap<String, Set<String>> pkg2types = TypeSolverEntry.solve_pkg2types(projectPath);
+                commitDiff.fileDiffs.forEach(fileDiff -> {
+                    String path = PathUtils.getNewPath(fileDiff.diffEntry, repository);
+                    if (path == null) return;
+                    fileDiff.path2 = path;
+                    VarVisitor varVisitor = TypeSolverEntry.solveVarTypesInFile(path, pkg2types);
+                    CompilationUnit cu = JPHelper.getCompilationUnit(path);
+                    cu.findAll(MethodDeclaration.class).forEach(n -> n.getRange().ifPresent(r -> {
+                        Set<Hunk> insideHunks = fileDiff.hunks.stream()
+                                .filter(hunk -> r.contains(hunk.r2))
+                                .collect(Collectors.toSet());
+                        if (!insideHunks.isEmpty()) {
+                            try {
+                                PDGBuilder builder = new PDGBuilder(pkg2types, varVisitor);
+                                MethodPDG graph = builder.build(n);
+                                MethodDeclaration cloned = n.clone();
+                                Optional<Node> parOpt = n.getParentNode();
+                                int K_data = (graph.vertexCount() / a) + 1;
+                                insideHunks.forEach(hunk -> {
+                                    List<Integer> chLines = hunk.getAddLines();
+                                    if (!chLines.isEmpty()) {
+                                        Set<Integer> reservedLines = DTEntry.dependencyTrack(graph, chLines, K_data, K_ctrl);
+                                        MethodDeclaration n2 = SrcCodeTransformer.slice(cloned, reservedLines);
+                                        parOpt.ifPresent(n2::setParentNode);
+                                        hunk.slice2 = builder.build(n2);
+                                        if (hunk.slice2 == null) SLICING_ERR++;
+                                        hunk.n2 = n;
+                                        hunk.graph2 = graph;
+                                        if (this.log) {
+                                            HKHelper.output2(outputBase, hunk, logger);
+                                        }
+                                    }
+                                });
+                            }
+                            catch (Exception e) {
+                                PDG_BUILD_ERR++;
+                            }
+                        }
+                    }));
+                });
+            } catch (GitAPIException e) {
+                e.printStackTrace();
+            }
+        }
+        return commitDiff;
+    }
+
+    public CommitDiff solve2 (RevCommit commit, BufferedWriter logger) {
+        RevCommit par = JGitUtils.findFirstParent(repository, commit);
+        if (par == null) return null;
+        List<DiffEntry> diffEntries = null;
+        try {
+            diffEntries = JGitUtils.listDiffEntries(repository, par, commit, ".java");
+        } catch (IOException | GitAPIException e) {
+            e.printStackTrace();
+        }
+        if (diffEntries == null || diffEntries.isEmpty() || diffEntries.size() > MAX_ENTRY_SIZE) return null;
+        CommitDiff commitDiff = new CommitDiff(commit, repository, par.getId().name(), commit.getId().name());
+        commitDiff.fileDiffs = diffEntries.stream()
+                .map(FileDiff::new)
+                .collect(Collectors.toList());
+        commitDiff.fileDiffs.forEach(fileDiff -> {
+            try {
+                EditList edits = JGitUtils.getEditList(repository, fileDiff.diffEntry);
+                if (edits.size() > MAX_HUNKS) return;
+                edits.stream()
+                        .map(Hunk::new)
+                        .forEach(hunk -> {
+                            hunk.commitDiff = commitDiff;
+                            hunk.fileDiff = fileDiff;
+                            fileDiff.hunks.add(hunk);
+                        });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        // v1
+        {
+            try {
+                jgit.checkout(par.getId().name());
+                HashMap<String, Set<String>> pkg2types = TypeSolverEntry.solve_pkg2types(projectPath);
+                commitDiff.fileDiffs.forEach(fileDiff -> {
+                    String path = PathUtils.getOldPath(fileDiff.diffEntry, repository);
+                    if (path == null) return;
+                    fileDiff.path1 = path;
+                    VarVisitor varVisitor = TypeSolverEntry.solveVarTypesInFile(path, pkg2types);
+                    CompilationUnit cu = JPHelper.getCompilationUnit(path);
+                    cu.findAll(MethodDeclaration.class).forEach(n -> n.getRange().ifPresent(r -> {
+                        Set<Hunk> insideHunks = fileDiff.hunks.stream()
+                                .filter(hunk -> r.contains(hunk.r1))
+                                .collect(Collectors.toSet());
+                        if (!insideHunks.isEmpty()) {
+                            try {
+                                MethodDiff methodDIff = new MethodDiff();
+                                PDGBuilder builder = new PDGBuilder(pkg2types, varVisitor);
+                                MethodPDG graph = builder.build(n);
+                                insideHunks.forEach(hunk -> {
+
                                 });
                             }
                             catch (Exception e) {

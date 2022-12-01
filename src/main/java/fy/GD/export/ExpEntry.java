@@ -96,14 +96,12 @@ public class ExpEntry {
                 writeProperty(json, 12, "target", String.valueOf(tgt), true);
                 writeProperty(json, 12, "label", label, false);
                 controlFlowEdgeCount++;
-                if (controlFlowEdgeCount == graph.edgeCount()) {
-                    writeRightBracket(json, 8, false);
-                }
-                else if (graph.dataFlowEdges.size() > 0) {
+                System.out.println("here: " + graph.dataFlowEdges.size());
+                if (graph.dataFlowEdges.size() > 0) {
                     writeRightBracket(json, 8, true);
                 }
                 else {
-                    writeRightBracket(json, 8, false);
+                    writeRightBracket(json, 9, controlFlowEdgeCount != graph.edgeCount());
                 }
             }
             int dataFlowEdgeCount = 0;
@@ -117,12 +115,7 @@ public class ExpEntry {
                 writeProperty(json, 12, "target", String.valueOf(tgt), true);
                 writeProperty(json, 12, "label", label, false);
                 dataFlowEdgeCount++;
-                if (dataFlowEdgeCount == graph.dataFlowEdges.size()) {
-                    writeRightBracket(json, 8, false);
-                }
-                else {
-                    writeRightBracket(json, 8, true);
-                }
+                writeRightBracket(json, 8, dataFlowEdgeCount != graph.dataFlowEdges.size());
             }
             listEnd(json, 4, false);
             //end

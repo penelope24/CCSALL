@@ -26,6 +26,7 @@ public class GraphNode {
     private String simplifyCodeStr;
     private int codeLineNum;
     private String dotNum;
+    private String hunkStr;
 
 
     private GraphNode parentNode;
@@ -164,6 +165,15 @@ public class GraphNode {
         if(!this.preAdjacentPoints.contains(preAdjacentPoint)){ //邻接点不应该重复
             this.preAdjacentPoints.add(preAdjacentPoint);
         }
+    }
+
+    public String getHunkStr() {
+        return hunkStr;
+    }
+
+    public GraphNode setHunkStr(String hunkStr) {
+        this.hunkStr = hunkStr;
+        return this;
     }
 
     //删除前驱节点

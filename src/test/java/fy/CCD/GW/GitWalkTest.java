@@ -38,23 +38,14 @@ class GitWalkTest {
 
     @Test
     void reproduce() throws IOException, GitAPIException {
-        String v = "e1d181208d6198682e1ac2d4c702515968323c04";
-        String fileName = "ChangeNoteUtil.java";
+        String v = "619c1a1384607450b03e9d8a9a7d3e0ea3982123";
+        String fileName = "Comment.java";
         RevCommit commit = repository.parseCommit(repository.resolve(v));
         GitWalk walk = new GitWalk(path);
-        RevCommit par = JGitUtils.findFirstParent(repository, commit);
-        List<DiffEntry> diffEntries = JGitUtils.listDiffEntries(repository, par, commit, ".java");
-        DiffEntry diffEntry = diffEntries.stream()
-                .filter(entry -> entry.getOldPath().contains(fileName))
-                .findFirst().get();
-        EditList edits = JGitUtils.getEditList(repository, diffEntry);
-        edits.forEach(edit -> {
-            Hunk hunk = new Hunk(edit);
-            System.out.println(edit);
-            System.out.println(edit.getType().name());
-            System.out.println(hunk.getRemLines());
-            System.out.println(hunk.getAddLines());
-        });
+        walk.setLogger(logPath);
+        walk.setOutputBase(outputBase);
+        walk.solve(commit, walk.logger);
+        walk.check();
     }
 
 

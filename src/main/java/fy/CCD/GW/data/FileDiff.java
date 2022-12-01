@@ -3,6 +3,7 @@ package fy.CCD.GW.data;
 import fy.GD.mgraph.MethodPDG;
 import org.eclipse.jgit.diff.DiffEntry;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class FileDiff {
     public MethodPDG graph1;
     public MethodPDG graph2;
     public List<Hunk> hunks = new LinkedList<>();
+    public List<MethodDiff> methodDiffs = new ArrayList<>();
 
 
     public FileDiff(DiffEntry diffEntry) {
