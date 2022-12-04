@@ -52,4 +52,9 @@ public class MethodPDG extends AbstractProgramGraph<GraphNode, CFEdge> {
     public void exportJSON(String s) throws IOException {
 
     }
+
+    @Override
+    public String toString() {
+        return "MethodPDG_" + System.identityHashCode(this);
+    }
 }

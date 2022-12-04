@@ -1,6 +1,7 @@
 package fy.GD.export;
 
 import fy.CCD.GW.data.Hunk;
+import fy.CCD.GW.data.MethodDiff;
 import fy.GD.basic.GraphNode;
 import fy.GD.edges.CFEdge;
 import fy.GD.edges.DFEdge;
@@ -13,6 +14,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 public class ExpEntry {
 
@@ -71,9 +74,25 @@ public class ExpEntry {
                 writeLeftBracket(json, 8);
                 int id = nodeCount++;
                 nodeIdMap.put(node, id);
+                int sliceNum = node.getSliceNum();
                 writeProperty(json, 12, "id", String.valueOf(id), true);
                 writeProperty(json, 12, "line", String.valueOf(node.getCodeLineNum()), true);
-                writeProperty(json, 12, "label", node.getSimplifyCodeStr(), false);
+                if (sliceNum == 0) {
+                    writeProperty(json, 12, "label", node.getSimplifyCodeStr(), false);
+                }
+                else {
+                    writeProperty(json, 12, "label", node.getSimplifyCodeStr(), true);
+                }
+                // slice info
+                IntStream.of(sliceNum).forEach(i -> {
+                    String propName = "slice__" + i++;
+                    if (i == sliceNum) {
+                        writeProperty(json, 12, propName, "true", false);
+                    }
+                    else {
+                        writeProperty(json, 12, propName, "true", true);
+                    }
+                });
                 if (nodeCount == graph.vertexCount()) {
                     writeRightBracket(json, 8, false);
                 }
@@ -83,6 +102,95 @@ public class ExpEntry {
             }
             listEnd(json, 4, true);
              newLine(json);
+            // edges
+            listStart(json, 4, "links");
+            int controlFlowEdgeCount = 0;
+            for (Edge<GraphNode, CFEdge> edge : graph.copyEdgeSet()) {
+                int src = nodeIdMap.get(edge.source);
+                int tgt = nodeIdMap.get(edge.target);
+                String label = "control_flow";
+                writeLeftBracket(json, 8);
+                writeProperty(json, 12, "id", String.valueOf(controlFlowEdgeCount), true);
+                writeProperty(json, 12, "source", String.valueOf(src), true);
+                writeProperty(json, 12, "target", String.valueOf(tgt), true);
+                writeProperty(json, 12, "label", label, false);
+                controlFlowEdgeCount++;
+                if (graph.dataFlowEdges.size() > 0) {
+                    writeRightBracket(json, 8, true);
+                }
+                else {
+                    writeRightBracket(json, 9, controlFlowEdgeCount != graph.edgeCount());
+                }
+            }
+            int dataFlowEdgeCount = 0;
+            for (Edge<GraphNode, DFEdge> edge : graph.dataFlowEdges) {
+                int src = nodeIdMap.get(edge.source);
+                int tgt = nodeIdMap.get(edge.target);
+                String label = "data_flow";
+                writeLeftBracket(json, 8);
+                writeProperty(json, 12, "id", String.valueOf(dataFlowEdgeCount), true);
+                writeProperty(json, 12, "source", String.valueOf(src), true);
+                writeProperty(json, 12, "target", String.valueOf(tgt), true);
+                writeProperty(json, 12, "label", label, false);
+                dataFlowEdgeCount++;
+                writeRightBracket(json, 8, dataFlowEdgeCount != graph.dataFlowEdges.size());
+            }
+            listEnd(json, 4, false);
+            //end
+            writeRightBracket(json, 0, false);
+        }
+        catch (UnsupportedEncodingException | FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void exportJSON(MethodPDG graph, MethodDiff methodDiff, String outputFile) {
+        try (PrintWriter json = new PrintWriter(outputFile, "UTF-8")) {
+            // start
+            writeLeftBracket(json, 0);
+            // graph properties
+            writeProperty(json, 4,"directed", "true", true);
+            writeProperty(json, 4,"multi_graph", "true", true);
+            writeProperty(json, 4,"commit_id", methodDiff.getCommitDiff().getCurrentVersion(), true);
+            writeProperty(json, 4,"file_name", methodDiff.getFileDiff().getSimpleName(), true);
+            writeProperty(json, 4,"method_name", methodDiff.getMethodName(), true);
+            newLine(json);
+            // nodes
+            listStart(json, 4, "nodes");
+            Map<GraphNode, Integer> nodeIdMap = new LinkedHashMap<>();
+            int nodeCount = 0;
+            for (GraphNode node : graph.copyVertexSet()) {
+                writeLeftBracket(json, 8);
+                int id = nodeCount++;
+                nodeIdMap.put(node, id);
+                int sliceNum = node.getSliceNum();
+                writeProperty(json, 12, "id", String.valueOf(id), true);
+                writeProperty(json, 12, "line", String.valueOf(node.getCodeLineNum()), true);
+                if (sliceNum == 0) {
+                    writeProperty(json, 12, "label", node.getSimplifyCodeStr(), false);
+                }
+                else {
+                    writeProperty(json, 12, "label", node.getSimplifyCodeStr(), true);
+                }
+                // slice info
+                IntStream.of(sliceNum).forEach(i -> {
+                    String propName = "slice__" + i++;
+                    if (i == sliceNum) {
+                        writeProperty(json, 12, propName, "true", false);
+                    }
+                    else {
+                        writeProperty(json, 12, propName, "true", true);
+                    }
+                });
+                if (nodeCount == graph.vertexCount()) {
+                    writeRightBracket(json, 8, false);
+                }
+                else {
+                    writeRightBracket(json, 8, true);
+                }
+            }
+            listEnd(json, 4, true);
+            newLine(json);
             // edges
             listStart(json, 4, "links");
             int controlFlowEdgeCount = 0;

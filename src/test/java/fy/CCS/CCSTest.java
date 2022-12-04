@@ -6,6 +6,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import fy.CCS.slicing.PDGBuilder;
 import fy.CCS.slicing.SrcCodeTransformer;
 import fy.CCS.track.DTEntry;
+import fy.GD.basic.GraphNode;
 import fy.GD.mgraph.MethodPDG;
 import fy.jp.JPHelper;
 import org.junit.jupiter.api.Test;
@@ -195,5 +196,22 @@ public class CCSTest {
                 System.out.println(node.getRange().get());
             }
         }
+    }
+
+    @Test
+    void test_node_equality() {
+        String javaFile = "/Users/fy/Documents/MyProjects/slicing_cases/custom_slice_cases/advance/nested2.java";
+        int start = 16;
+        MethodDeclaration n = JPHelper.getCompilationUnit(javaFile).findFirst(MethodDeclaration.class).get();
+        MethodDeclaration nClone = n.clone();
+        MethodPDG graph = PDGBuilder.one_pass_parse(project, javaFile, n);
+        Set<Integer> reservedLines = DTEntry.dependencyTrack(graph, start, MAX_DATA_DEPTH, MAX_CTRL_DEPTH);
+        MethodDeclaration slice = SrcCodeTransformer.slice(nClone, reservedLines);
+        n.getParentNode().ifPresent(slice::setParentNode);
+        MethodPDG g = PDGBuilder.one_pass_parse(project, javaFile, slice);
+        g.copyVertexSet().forEach(v -> {
+            GraphNode node = graph.copyVertexSet().stream().filter(n1 -> n1.equals(v)).findFirst().orElse(null);
+            assert node != null;
+        });
     }
 }

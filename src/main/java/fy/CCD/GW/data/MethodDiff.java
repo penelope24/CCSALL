@@ -6,71 +6,61 @@ import fy.GD.mgraph.MethodPDG;
 import org.eclipse.jgit.diff.Edit;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class MethodDiff {
-    MethodDeclaration m_old;
-    MethodDeclaration m_new;
-    MethodPDG g_old;
-    MethodPDG g_new;
-    List<Hunk> hunks_old;
-    List<Hunk> hunks_new;
+
+    MethodPDG g1;
+    MethodPDG g2;
+    MethodDeclaration n1;
+    MethodDeclaration n2;
     CommitDiff commitDiff;
     FileDiff fileDiff;
+    Set<Hunk> hunks;
 
-    public MethodDiff() {
+    public MethodDiff(Hunk hunk) {
+        this.g1 = hunk.graph1;
+        this.g2 = hunk.graph2;
+        this.n1 = hunk.n1;
+        this.n2 = hunk.n2;
+        this.commitDiff = hunk.commitDiff;
+        this.fileDiff = hunk.fileDiff;
     }
 
-    public MethodDeclaration getM_old() {
-        return m_old;
+    public MethodPDG getG1() {
+        return g1;
     }
 
-    public MethodDiff setM_old(MethodDeclaration m_old) {
-        this.m_old = m_old;
+    public MethodDiff setG1(MethodPDG g1) {
+        this.g1 = g1;
         return this;
     }
 
-    public MethodDeclaration getM_new() {
-        return m_new;
+    public MethodPDG getG2() {
+        return g2;
     }
 
-    public MethodDiff setM_new(MethodDeclaration m_new) {
-        this.m_new = m_new;
+    public MethodDiff setG2(MethodPDG g2) {
+        this.g2 = g2;
         return this;
     }
 
-    public MethodPDG getG_old() {
-        return g_old;
+    public MethodDeclaration getN1() {
+        return n1;
     }
 
-    public MethodDiff setG_old(MethodPDG g_old) {
-        this.g_old = g_old;
+    public MethodDiff setN1(MethodDeclaration n1) {
+        this.n1 = n1;
         return this;
     }
 
-    public MethodPDG getG_new() {
-        return g_new;
+    public MethodDeclaration getN2() {
+        return n2;
     }
 
-    public MethodDiff setG_new(MethodPDG g_new) {
-        this.g_new = g_new;
-        return this;
-    }
-
-    public List<Hunk> getHunks_old() {
-        return hunks_old;
-    }
-
-    public MethodDiff setHunks_old(List<Hunk> hunks_old) {
-        this.hunks_old = hunks_old;
-        return this;
-    }
-
-    public List<Hunk> getHunks_new() {
-        return hunks_new;
-    }
-
-    public MethodDiff setHunks_new(List<Hunk> hunks_new) {
-        this.hunks_new = hunks_new;
+    public MethodDiff setN2(MethodDeclaration n2) {
+        this.n2 = n2;
         return this;
     }
 
@@ -90,5 +80,40 @@ public class MethodDiff {
     public MethodDiff setFileDiff(FileDiff fileDiff) {
         this.fileDiff = fileDiff;
         return this;
+    }
+
+    public Set<Hunk> getHunks() {
+        return hunks;
+    }
+
+    public MethodDiff setHunks(Set<Hunk> hunks) {
+        this.hunks = hunks;
+        return this;
+    }
+
+    public String getMethodName() {
+        if (n1 != null) {
+            return n1.getNameAsString();
+        }
+        else if (n2 != null) {
+            return n2.getNameAsString();
+        }
+        else {
+            return "";
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MethodDiff that = (MethodDiff) o;
+        return Objects.equals(getN1(), that.getN1()) &&
+                Objects.equals(getN2(), that.getN2());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getN1(), getN2());
     }
 }

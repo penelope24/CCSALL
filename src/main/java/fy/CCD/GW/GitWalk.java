@@ -4,6 +4,8 @@ package fy.CCD.GW;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import fy.CCD.GW.data.CommitDiff;
 import fy.CCD.GW.data.FileDiff;
 import fy.CCD.GW.data.Hunk;
@@ -12,11 +14,12 @@ import fy.CCD.GW.utils.HKHelper;
 import fy.CCD.GW.utils.JGitUtils;
 import fy.CCD.GW.utils.PathUtils;
 import fy.CCS.slicing.PDGBuilder;
-import fy.CCS.slicing.Slicer;
 import fy.CCS.slicing.SrcCodeTransformer;
 import fy.CCS.track.DTEntry;
 import fy.GB.entry.TypeSolverEntry;
 import fy.GB.visitor.VarVisitor;
+import fy.GD.basic.GraphNode;
+import fy.GD.export.ExpEntry;
 import fy.GD.mgraph.MethodPDG;
 import fy.jp.JPHelper;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -29,6 +32,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class GitWalk {
@@ -74,23 +78,14 @@ public class GitWalk {
         }
     }
 
-    public void walk() {
-        if (log) {
-            allCommits.forEach(commit -> commitDiffs.add(solve(commit, logger)));
-            try {
-                logger.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else {
-            allCommits.forEach(commit -> commitDiffs.add(solve(commit, null)));
-        }
-    }
-
     public void walk(int num) {
         if (log) {
-            allCommits.subList(0, num).forEach(commit -> commitDiffs.add(solve(commit, logger)));
+            allCommits.subList(0, num).forEach(commit -> {
+                CommitDiff commitDiff = solve(commit, logger);
+                if (commitDiff != null) {
+                    commitDiffs.add(commitDiff);
+                }
+            });
             try {
                 logger.close();
             } catch (IOException e) {
@@ -98,21 +93,12 @@ public class GitWalk {
             }
         }
         else {
-            allCommits.subList(0, num).forEach(commit -> commitDiffs.add(solve(commit, null)));
-        }
-    }
-
-    public void walk(int s, int t) {
-        if (log) {
-            allCommits.subList(s, t).forEach(commit -> commitDiffs.add(solve(commit, logger)));
-            try {
-                logger.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else {
-            allCommits.subList(s, t).forEach(commit -> commitDiffs.add(solve(commit, null)));
+            allCommits.subList(0, num).forEach(commit -> {
+                CommitDiff commitDiff = solve(commit, logger);
+                if (commitDiff != null) {
+                    commitDiffs.add(commitDiff);
+                }
+            });
         }
     }
 
@@ -180,6 +166,7 @@ public class GitWalk {
                                         if (this.log) {
                                             HKHelper.output1(outputBase, hunk, logger);
                                         }
+                                        fileDiff.ccMap1.put(n, hunk);
                                     }
                                 });
                             }
@@ -228,6 +215,7 @@ public class GitWalk {
                                         if (this.log) {
                                             HKHelper.output2(outputBase, hunk, logger);
                                         }
+                                        fileDiff.ccMap2.put(n, hunk);
                                     }
                                 });
                             }
@@ -244,119 +232,119 @@ public class GitWalk {
         return commitDiff;
     }
 
-    public CommitDiff solve2 (RevCommit commit, BufferedWriter logger) {
-        RevCommit par = JGitUtils.findFirstParent(repository, commit);
-        if (par == null) return null;
-        List<DiffEntry> diffEntries = null;
-        try {
-            diffEntries = JGitUtils.listDiffEntries(repository, par, commit, ".java");
-        } catch (IOException | GitAPIException e) {
-            e.printStackTrace();
-        }
-        if (diffEntries == null || diffEntries.isEmpty() || diffEntries.size() > MAX_ENTRY_SIZE) return null;
-        CommitDiff commitDiff = new CommitDiff(commit, repository, par.getId().name(), commit.getId().name());
-        commitDiff.fileDiffs = diffEntries.stream()
-                .map(FileDiff::new)
-                .collect(Collectors.toList());
-        commitDiff.fileDiffs.forEach(fileDiff -> {
-            try {
-                EditList edits = JGitUtils.getEditList(repository, fileDiff.diffEntry);
-                if (edits.size() > MAX_HUNKS) return;
-                edits.stream()
-                        .map(Hunk::new)
-                        .forEach(hunk -> {
-                            hunk.commitDiff = commitDiff;
-                            hunk.fileDiff = fileDiff;
-                            fileDiff.hunks.add(hunk);
-                        });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        // v1
-        {
-            try {
-                jgit.checkout(par.getId().name());
-                HashMap<String, Set<String>> pkg2types = TypeSolverEntry.solve_pkg2types(projectPath);
-                commitDiff.fileDiffs.forEach(fileDiff -> {
-                    String path = PathUtils.getOldPath(fileDiff.diffEntry, repository);
-                    if (path == null) return;
-                    fileDiff.path1 = path;
-                    VarVisitor varVisitor = TypeSolverEntry.solveVarTypesInFile(path, pkg2types);
-                    CompilationUnit cu = JPHelper.getCompilationUnit(path);
-                    cu.findAll(MethodDeclaration.class).forEach(n -> n.getRange().ifPresent(r -> {
-                        Set<Hunk> insideHunks = fileDiff.hunks.stream()
-                                .filter(hunk -> r.contains(hunk.r1))
-                                .collect(Collectors.toSet());
-                        if (!insideHunks.isEmpty()) {
-                            try {
-                                MethodDiff methodDIff = new MethodDiff();
-                                PDGBuilder builder = new PDGBuilder(pkg2types, varVisitor);
-                                MethodPDG graph = builder.build(n);
-                                insideHunks.forEach(hunk -> {
-
-                                });
-                            }
-                            catch (Exception e) {
-                                PDG_BUILD_ERR++;
-                            }
-                        }
-                    }));
-                });
-            } catch (GitAPIException e) {
-                e.printStackTrace();
-            }
-        }
-        // v2
-        {
-            try {
-                jgit.checkout(commit.getId().name());
-                HashMap<String, Set<String>> pkg2types = TypeSolverEntry.solve_pkg2types(projectPath);
-                commitDiff.fileDiffs.forEach(fileDiff -> {
-                    String path = PathUtils.getNewPath(fileDiff.diffEntry, repository);
-                    if (path == null) return;
-                    fileDiff.path2 = path;
-                    VarVisitor varVisitor = TypeSolverEntry.solveVarTypesInFile(path, pkg2types);
-                    CompilationUnit cu = JPHelper.getCompilationUnit(path);
-                    cu.findAll(MethodDeclaration.class).forEach(n -> n.getRange().ifPresent(r -> {
-                        Set<Hunk> insideHunks = fileDiff.hunks.stream()
-                                .filter(hunk -> r.contains(hunk.r2))
-                                .collect(Collectors.toSet());
-                        if (!insideHunks.isEmpty()) {
-                            try {
-                                PDGBuilder builder = new PDGBuilder(pkg2types, varVisitor);
-                                MethodPDG graph = builder.build(n);
-                                MethodDeclaration cloned = n.clone();
-                                Optional<Node> parOpt = n.getParentNode();
-                                int K_data = (graph.vertexCount() / a) + 1;
-                                insideHunks.forEach(hunk -> {
-                                    List<Integer> chLines = hunk.getAddLines();
-                                    if (!chLines.isEmpty()) {
-                                        Set<Integer> reservedLines = DTEntry.dependencyTrack(graph, chLines, K_data, K_ctrl);
-                                        MethodDeclaration n2 = SrcCodeTransformer.slice(cloned, reservedLines);
-                                        parOpt.ifPresent(n2::setParentNode);
-                                        hunk.slice2 = builder.build(n2);
-                                        if (hunk.slice2 == null) SLICING_ERR++;
-                                        hunk.n2 = n;
-                                        hunk.graph2 = graph;
-                                        if (this.log) {
-                                            HKHelper.output2(outputBase, hunk, logger);
-                                        }
-                                    }
-                                });
-                            }
-                            catch (Exception e) {
-                                PDG_BUILD_ERR++;
-                            }
-                        }
-                    }));
-                });
-            } catch (GitAPIException e) {
-                e.printStackTrace();
-            }
-        }
-        return commitDiff;
-    }
+//    public CommitDiff solve2 (RevCommit commit, BufferedWriter logger) {
+//        RevCommit par = JGitUtils.findFirstParent(repository, commit);
+//        if (par == null) return null;
+//        List<DiffEntry> diffEntries = null;
+//        try {
+//            diffEntries = JGitUtils.listDiffEntries(repository, par, commit, ".java");
+//        } catch (IOException | GitAPIException e) {
+//            e.printStackTrace();
+//        }
+//        if (diffEntries == null || diffEntries.isEmpty() || diffEntries.size() > MAX_ENTRY_SIZE) return null;
+//        CommitDiff commitDiff = new CommitDiff(commit, repository, par.getId().name(), commit.getId().name());
+//        commitDiff.fileDiffs = diffEntries.stream()
+//                .map(FileDiff::new)
+//                .collect(Collectors.toList());
+//        commitDiff.fileDiffs.forEach(fileDiff -> {
+//            try {
+//                EditList edits = JGitUtils.getEditList(repository, fileDiff.diffEntry);
+//                if (edits.size() > MAX_HUNKS) return;
+//                edits.stream()
+//                        .map(Hunk::new)
+//                        .forEach(hunk -> {
+//                            hunk.commitDiff = commitDiff;
+//                            hunk.fileDiff = fileDiff;
+//                            fileDiff.hunks.add(hunk);
+//                        });
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        });
+//        // v1
+//        {
+//            try {
+//                jgit.checkout(par.getId().name());
+//                HashMap<String, Set<String>> pkg2types = TypeSolverEntry.solve_pkg2types(projectPath);
+//                commitDiff.fileDiffs.forEach(fileDiff -> {
+//                    String path = PathUtils.getOldPath(fileDiff.diffEntry, repository);
+//                    if (path == null) return;
+//                    fileDiff.path1 = path;
+//                    VarVisitor varVisitor = TypeSolverEntry.solveVarTypesInFile(path, pkg2types);
+//                    CompilationUnit cu = JPHelper.getCompilationUnit(path);
+//                    cu.findAll(MethodDeclaration.class).forEach(n -> n.getRange().ifPresent(r -> {
+//                        Set<Hunk> insideHunks = fileDiff.hunks.stream()
+//                                .filter(hunk -> r.contains(hunk.r1))
+//                                .collect(Collectors.toSet());
+//                        if (!insideHunks.isEmpty()) {
+//                            try {
+//                                MethodDiff methodDIff = new MethodDiff();
+//                                PDGBuilder builder = new PDGBuilder(pkg2types, varVisitor);
+//                                MethodPDG graph = builder.build(n);
+//                                insideHunks.forEach(hunk -> {
+//
+//                                });
+//                            }
+//                            catch (Exception e) {
+//                                PDG_BUILD_ERR++;
+//                            }
+//                        }
+//                    }));
+//                });
+//            } catch (GitAPIException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        // v2
+//        {
+//            try {
+//                jgit.checkout(commit.getId().name());
+//                HashMap<String, Set<String>> pkg2types = TypeSolverEntry.solve_pkg2types(projectPath);
+//                commitDiff.fileDiffs.forEach(fileDiff -> {
+//                    String path = PathUtils.getNewPath(fileDiff.diffEntry, repository);
+//                    if (path == null) return;
+//                    fileDiff.path2 = path;
+//                    VarVisitor varVisitor = TypeSolverEntry.solveVarTypesInFile(path, pkg2types);
+//                    CompilationUnit cu = JPHelper.getCompilationUnit(path);
+//                    cu.findAll(MethodDeclaration.class).forEach(n -> n.getRange().ifPresent(r -> {
+//                        Set<Hunk> insideHunks = fileDiff.hunks.stream()
+//                                .filter(hunk -> r.contains(hunk.r2))
+//                                .collect(Collectors.toSet());
+//                        if (!insideHunks.isEmpty()) {
+//                            try {
+//                                PDGBuilder builder = new PDGBuilder(pkg2types, varVisitor);
+//                                MethodPDG graph = builder.build(n);
+//                                MethodDeclaration cloned = n.clone();
+//                                Optional<Node> parOpt = n.getParentNode();
+//                                int K_data = (graph.vertexCount() / a) + 1;
+//                                insideHunks.forEach(hunk -> {
+//                                    List<Integer> chLines = hunk.getAddLines();
+//                                    if (!chLines.isEmpty()) {
+//                                        Set<Integer> reservedLines = DTEntry.dependencyTrack(graph, chLines, K_data, K_ctrl);
+//                                        MethodDeclaration n2 = SrcCodeTransformer.slice(cloned, reservedLines);
+//                                        parOpt.ifPresent(n2::setParentNode);
+//                                        hunk.slice2 = builder.build(n2);
+//                                        if (hunk.slice2 == null) SLICING_ERR++;
+//                                        hunk.n2 = n;
+//                                        hunk.graph2 = graph;
+//                                        if (this.log) {
+//                                            HKHelper.output2(outputBase, hunk, logger);
+//                                        }
+//                                    }
+//                                });
+//                            }
+//                            catch (Exception e) {
+//                                PDG_BUILD_ERR++;
+//                            }
+//                        }
+//                    }));
+//                });
+//            } catch (GitAPIException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return commitDiff;
+//    }
 
     public void check() {
         System.out.println("pdg build fails: " + PDG_BUILD_ERR);
@@ -375,6 +363,60 @@ public class GitWalk {
         System.out.println("total valid hunk set size: " + totalHunkList.size());
     }
 
+    public void output(String base) {
+        commitDiffs.forEach(commitDiff -> {
+            String dir = base + "__" + commitDiff.getCurrentVersion();
+            File f1 = new File(dir);
+            f1.mkdir();
+            Multimap<MethodDiff, Hunk> map = ArrayListMultimap.create();
+            Set<Hunk> hunks = commitDiff.getValidHunks();
+            hunks.forEach(hunk -> map.put(new MethodDiff(hunk), hunk));
+            map.keySet().forEach(methodDiff -> {
+                String dir2 = dir + "__" + methodDiff.getFileDiff().getSimpleName() + "__" + methodDiff.getMethodName();
+                File f2 = new File(dir2);
+                f2.mkdir();
+                // v1
+                {
+                    MethodPDG graph = methodDiff.getG1();
+                    Set<Hunk> insides = new HashSet<>(map.get(methodDiff));
+                    AtomicInteger idx = new AtomicInteger();
+                    insides.forEach(hunk -> {
+                        MethodPDG sliceSubGraph = hunk.slice1;
+                        sliceSubGraph.copyVertexSet().forEach(n -> {
+                            GraphNode node = graph.copyVertexSet().stream().filter(n1 -> n1.equals(n)).findFirst().orElse(null);
+                            System.out.println(hunk.commitDiff.v1);
+                            System.out.println(hunk.fileDiff.getSimpleName());
+                            assert node != null;
+                            String key = "slice__" + idx.getAndIncrement();
+                            node.addSliceInfo(key, true);
+                        });
+                    });
+                    ExpEntry.exportJSON(graph, methodDiff, dir2 + "/" + "graph1.json");
+                }
+                // v2
+                {
+                    MethodPDG graph = methodDiff.getG2();
+                    Set<Hunk> insides = new HashSet<>(map.get(methodDiff));
+                    AtomicInteger idx = new AtomicInteger();
+                    insides.forEach(hunk -> {
+                        MethodPDG sliceSubGraph = hunk.slice2;
+                        sliceSubGraph.copyVertexSet().forEach(n -> {
+                            assert n != null;
+                            System.out.println(n.getCodeLineNum());
+                            System.out.println(n.getSimplifyCodeStr());
+                            GraphNode node = graph.copyVertexSet().stream().filter(n1 -> n1.getCodeLineNum() == n.getCodeLineNum()).findFirst().orElse(null);
+                            assert node != null;
+                            System.out.println(node.getSimplifyCodeStr());
+                            GraphNode node2 = graph.copyVertexSet().stream().filter(n1 -> n1.equals(n)).findFirst().orElse(null);
+                            String key = "slice__" + idx.getAndIncrement();
+                            node.addSliceInfo(key, true);
+                        });
+                    });
+                    ExpEntry.exportJSON(graph, methodDiff, dir2 + "/" + "graph2.json");
+                }
+            });
+        });
+    }
 
 
     public void setLogger(String logPath) {

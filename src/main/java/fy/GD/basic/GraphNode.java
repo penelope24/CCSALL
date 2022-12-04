@@ -1,8 +1,6 @@
 package fy.GD.basic;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * 图节点实体类
@@ -26,8 +24,7 @@ public class GraphNode {
     private String simplifyCodeStr;
     private int codeLineNum;
     private String dotNum;
-    private String hunkStr;
-
+    private Map<String, Boolean> sliceInfo = new HashMap<>();
 
     private GraphNode parentNode;
     private List<GraphNode> adjacentPoints; //这是cfg构建的点 后继节点
@@ -160,20 +157,23 @@ public class GraphNode {
         return preAdjacentPoints;
     }
 
+    public Map<String, Boolean> getSliceInfo() {
+        return sliceInfo;
+    }
+
+    public void addSliceInfo(String key, boolean value) {
+        this.sliceInfo.put(key, value);
+    }
+
+    public int getSliceNum() {
+        return sliceInfo.size();
+    }
+
     //添加前驱节点
     public void addPreAdjacentPoints(GraphNode preAdjacentPoint) {
         if(!this.preAdjacentPoints.contains(preAdjacentPoint)){ //邻接点不应该重复
             this.preAdjacentPoints.add(preAdjacentPoint);
         }
-    }
-
-    public String getHunkStr() {
-        return hunkStr;
-    }
-
-    public GraphNode setHunkStr(String hunkStr) {
-        this.hunkStr = hunkStr;
-        return this;
     }
 
     //删除前驱节点

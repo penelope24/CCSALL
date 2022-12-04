@@ -1,5 +1,8 @@
 package fy.CCD.GW.data;
 
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import fy.GD.mgraph.MethodPDG;
 import org.eclipse.jgit.diff.DiffEntry;
 
@@ -16,7 +19,8 @@ public class FileDiff {
     public MethodPDG graph1;
     public MethodPDG graph2;
     public List<Hunk> hunks = new LinkedList<>();
-    public List<MethodDiff> methodDiffs = new ArrayList<>();
+    public Multimap<MethodDeclaration, Hunk> ccMap1 = ArrayListMultimap.create();
+    public Multimap<MethodDeclaration, Hunk> ccMap2 = ArrayListMultimap.create();
 
 
     public FileDiff(DiffEntry diffEntry) {

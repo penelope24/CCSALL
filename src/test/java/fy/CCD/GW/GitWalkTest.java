@@ -28,24 +28,25 @@ class GitWalkTest {
         FileUtils.deleteDirectory(new File(outputBase));
         new File(outputBase).mkdir();
         GitWalk gitWalk = new GitWalk(path);
-        gitWalk.setLogger(logPath);
-        gitWalk.setOutputBase(outputBase);
+//        gitWalk.setLogger(logPath);
+//        gitWalk.setOutputBase(outputBase);
         gitWalk.walk1();
         System.out.println("pre walk over");
         gitWalk.walk(10);
         gitWalk.check();
+        gitWalk.output(outputBase);
     }
 
     @Test
     void reproduce() throws IOException, GitAPIException {
         String v = "619c1a1384607450b03e9d8a9a7d3e0ea3982123";
-        String fileName = "Comment.java";
+        String fileName = "ChangePredicates.java";
         RevCommit commit = repository.parseCommit(repository.resolve(v));
         GitWalk walk = new GitWalk(path);
-        walk.setLogger(logPath);
-        walk.setOutputBase(outputBase);
-        walk.solve(commit, walk.logger);
-        walk.check();
+        walk.walk1();
+        CommitDiff commitDiff = walk.solve(commit, null);
+        FileDiff fileDiff = commitDiff.fileDiffs.stream().filter(fileDiff1 -> fileDiff1.getSimpleName().contains(fileName)).findFirst().get();
+        System.out.println(fileDiff);
     }
 
 

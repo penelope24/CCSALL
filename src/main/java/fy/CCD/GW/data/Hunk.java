@@ -92,27 +92,33 @@ public class Hunk {
         }
     }
 
+//    @Override
+//    public String toString() {
+//        String s;
+//        StringBuilder sb = new StringBuilder();
+//        if (n1 == null || graph1 == null || slice1 == null) s = "none";
+//        else {
+//            sb.append("change region: ").append("\n");
+//            sb.append(r1).append("\n");
+//
+//            sb.append("").append("original method: ").append("\n");
+//            sb.append("").append(n1).append("\n");
+//            sb.append(n1.getRange().get()).append("\n");
+//            sb.append("").append("original graph vertexes: ").append(graph1.vertexCount()).append("\n");
+//
+//            sb.append("").append("sliced method: ").append("\n");
+//            sb.append(slice1.n).append("\n");
+//            sb.append(slice1.n.getRange().get());
+//            sb.append("").append("slice vertexes: ").append(slice1.vertexCount()).append("\n");
+//            sb.append("\n\n");
+//        }
+//        s = sb.toString();
+//        return s;
+//    }
+
+
     @Override
     public String toString() {
-        String s;
-        StringBuilder sb = new StringBuilder();
-        if (n1 == null || graph1 == null || slice1 == null) s = "none";
-        else {
-            sb.append("change region: ").append("\n");
-            sb.append(r1).append("\n");
-
-            sb.append("").append("original method: ").append("\n");
-            sb.append("").append(n1).append("\n");
-            sb.append(n1.getRange().get()).append("\n");
-            sb.append("").append("original graph vertexes: ").append(graph1.vertexCount()).append("\n");
-
-            sb.append("").append("sliced method: ").append("\n");
-            sb.append(slice1.n).append("\n");
-            sb.append(slice1.n.getRange().get());
-            sb.append("").append("slice vertexes: ").append(slice1.vertexCount()).append("\n");
-            sb.append("\n\n");
-        }
-        s = sb.toString();
-        return s;
+        return "Hunk_" + System.identityHashCode(this);
     }
 }
