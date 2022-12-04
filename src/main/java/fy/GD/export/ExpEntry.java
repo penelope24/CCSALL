@@ -96,7 +96,6 @@ public class ExpEntry {
                 writeProperty(json, 12, "target", String.valueOf(tgt), true);
                 writeProperty(json, 12, "label", label, false);
                 controlFlowEdgeCount++;
-                System.out.println("here: " + graph.dataFlowEdges.size());
                 if (graph.dataFlowEdges.size() > 0) {
                     writeRightBracket(json, 8, true);
                 }
