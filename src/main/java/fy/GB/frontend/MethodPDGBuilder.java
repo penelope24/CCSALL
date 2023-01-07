@@ -10,7 +10,6 @@ import fy.GD.mgraph.MethodCFG;
 import fy.GD.mgraph.MethodPDG;
 import ghaffarian.graphs.Edge;
 
-
 import java.util.*;
 
 public class MethodPDGBuilder {
@@ -102,7 +101,6 @@ public class MethodPDGBuilder {
 //        }
         return mPDG;
     }
-
 
     public MethodPDG buildGraph(GraphNode root) {
         boolean cfgFlag = Boolean.parseBoolean(prop.getProperty("node.cfg"));

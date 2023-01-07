@@ -1,4 +1,4 @@
-package fy.CCD.GW.utils;
+package fy.utils.git;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
@@ -120,7 +120,7 @@ public class JGitUtils {
         File lock = new File(project_path + "/.git/index.lock");
         if (lock.exists()) {
             boolean r = lock.delete();
-            assert r == true;
+            assert r;
         }
     }
 
@@ -129,7 +129,11 @@ public class JGitUtils {
      *  git checkout versionID
      * */
     public void checkout(String versionId) throws GitAPIException {
-        git.checkout().setName(versionId).call();
+        try {
+            git.checkout().setName(versionId).call();
+        } catch (GitAPIException e) {
+            git.checkout().setName(versionId).setForced(true).call();
+        }
     }
 
     /**

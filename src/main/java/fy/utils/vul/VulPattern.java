@@ -1,4 +1,4 @@
-package fy.CCD.GW.utils;
+package fy.utils.vul;
 
 import java.io.BufferedReader;
 import java.io.File;

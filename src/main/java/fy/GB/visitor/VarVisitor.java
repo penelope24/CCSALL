@@ -131,4 +131,16 @@ public class VarVisitor {
     public String getPackageStr() {
         return pkgInfo;
     }
+
+    public HashMap<String, Set<String>> getPkg2types() {
+        return pkg2types;
+    }
+
+    public String getPkgInfo() {
+        return pkgInfo;
+    }
+
+    public CompilationUnit getCu() {
+        return cu;
+    }
 }

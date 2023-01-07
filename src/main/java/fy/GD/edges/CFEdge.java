@@ -1,8 +1,11 @@
 package fy.GD.edges;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CFEdge {
     public final Type type;
-
+    public List<Integer> sliceInfo = new ArrayList<>();
     public CFEdge(Type type) {
         this.type = type;
     }
@@ -28,5 +31,13 @@ public class CFEdge {
         public String toString() {
             return label;
         }
+    }
+
+    public void addSlice(int idx) {
+        this.sliceInfo.add(idx);
+    }
+
+    public List<Integer> getSliceInfo() {
+        return sliceInfo;
     }
 }

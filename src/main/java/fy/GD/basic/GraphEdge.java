@@ -1,7 +1,5 @@
 package fy.GD.basic;
 
-import ghaffarian.graphs.Edge;
-
 import java.util.Objects;
 
 public class GraphEdge {

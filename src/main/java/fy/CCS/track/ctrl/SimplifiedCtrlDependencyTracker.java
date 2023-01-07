@@ -1,13 +1,9 @@
 package fy.CCS.track.ctrl;
 
 import fy.GD.basic.GraphNode;
-import fy.GD.edges.CDEdge;
 import fy.GD.mgraph.MethodPDG;
-import ghaffarian.graphs.Edge;
 
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SimplifiedCtrlDependencyTracker extends CtrlDependencyTracker{
 

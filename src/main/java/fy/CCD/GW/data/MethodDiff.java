@@ -1,11 +1,8 @@
 package fy.CCD.GW.data;
 
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import fy.GD.mgraph.MethodPDG;
-import org.eclipse.jgit.diff.Edit;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 

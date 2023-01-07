@@ -1,14 +1,11 @@
 package fy.CCS.track.data;
 
 import fy.GD.basic.GraphNode;
-import fy.GD.edges.CFEdge;
 import fy.GD.edges.DFEdge;
 import fy.GD.mgraph.MethodPDG;
 import ghaffarian.graphs.Edge;
-import ghaffarian.progex.graphs.pdg.DDEdge;
-import ghaffarian.progex.graphs.pdg.PDNode;
 
-import java.util.*;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BackwardDataDepTracker extends DataDependencyTracker{

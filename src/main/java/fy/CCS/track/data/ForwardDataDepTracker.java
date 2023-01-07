@@ -5,7 +5,7 @@ import fy.GD.edges.DFEdge;
 import fy.GD.mgraph.MethodPDG;
 import ghaffarian.graphs.Edge;
 
-import java.util.*;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ForwardDataDepTracker extends DataDependencyTracker{

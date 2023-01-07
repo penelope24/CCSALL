@@ -3,7 +3,7 @@ package fy.GB.visitor;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import fy.GB.entry.GBConfig;
+import fy.Config;
 import fy.GB.frontend.MethodPDGBuilder;
 import fy.GB.parse.ASTCreater;
 import fy.GB.parse.CFGCreator;
@@ -23,7 +23,7 @@ public class MethodVisitor {
     private final Set<String> package2types;
     private final List<String> imports;
     private final Set<DFVarNode> fields;
-    private Properties prop = GBConfig.loadProperties();
+    private Properties prop = Config.loadProperties();
 
     public MethodVisitor(VarVisitor varVisitor) {
         this.package2types = varVisitor.getCurrentPackageAllTypes();

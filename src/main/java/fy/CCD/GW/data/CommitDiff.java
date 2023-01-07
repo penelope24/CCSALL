@@ -1,9 +1,6 @@
 package fy.CCD.GW.data;
 
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import fy.GD.mgraph.MethodPDG;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -26,7 +23,7 @@ public class CommitDiff {
 
     public boolean is_valid() {
         if (fileDiffs == null || fileDiffs.isEmpty()) return false;
-        return !getValidHunks().isEmpty();
+        return fileDiffs.stream().anyMatch(FileDiff::isValid);
     }
 
 

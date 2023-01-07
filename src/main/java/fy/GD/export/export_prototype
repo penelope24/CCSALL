@@ -1,9 +1,0 @@
-graph level properties:
-    directed": "true",
-    "multi_graph": "true",
-    "commit_id": "72f4574492eb752a0c9f2e59bb31b6eb6667bc81",
-    "file_name": "AbstractQueryChangesTest.java",
-    "method_name": "byUploader",
-    "edit": "REPLACE(628-629,628-629)",
-    "v1 slice num": 5,
-    "v2 slice num": 6
