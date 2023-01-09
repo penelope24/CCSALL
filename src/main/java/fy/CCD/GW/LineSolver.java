@@ -52,7 +52,6 @@ public class LineSolver {
     Config config;
     JGitUtils jgit;
     Repository repository;
-    String repoName;
     String currVersion;
     TypeStatus currStatus;
     // stats
@@ -300,7 +299,7 @@ public class LineSolver {
     }
 
     public void stat() {
-        logger.log("analyzing project: " + repoName, null);
+        logger.log("analyzing project: " + config.repoName, null);
         logger.log("line size: " + commitLine.getSize(), null);
         logger.log("total analyzed commits: " + analyzed_commits, null);
         logger.log("total valid commits: " + valid_commits, null);
@@ -316,7 +315,7 @@ public class LineSolver {
 
     public void output(int idx) {
         logger.log("output at idx: " + idx, null);
-        String base = config.output + "/" + repoName;
+        String base = config.output + "/" + config.repoName;
         File baseFile = new File(base);
         if (!baseFile.exists()) {
             baseFile.mkdir();

@@ -1,5 +1,6 @@
 package fy.CCS;
 
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -8,9 +9,14 @@ import fy.CCS.slicing.SrcCodeTransformer;
 import fy.CCS.track.DTEntry;
 import fy.GD.basic.GraphNode;
 import fy.GD.mgraph.MethodPDG;
-import fy.jp.JPHelper;
+import fy.utils.file.JavaFileUtils;
+import fy.utils.git.JGitUtils;
+import fy.utils.tools.JPHelper;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -213,5 +219,31 @@ public class CCSTest {
             GraphNode node = graph.copyVertexSet().stream().filter(n1 -> n1.equals(v)).findFirst().orElse(null);
             assert node != null;
         });
+    }
+
+    @Test
+    void bug1() throws GitAPIException {
+        // scenario
+        String project = "/Users/fy/Documents/MyProjects/CodeChangeDataSet/gerrit";
+        String v = "f073e35b89c90f3b58978303d0a0b4fb91d85538";
+        String javaFile = "/Users/fy/Documents/MyProjects/CodeChangeDataSet/gerrit/java/com/google/gerrit/asciidoctor/DocIndexer.java";
+        String methodName = "index";
+        List<Integer> chLines = Arrays.asList(113, 114);
+        // locate
+        JGitUtils jgit = new JGitUtils(project);
+        jgit.checkout(v);
+        System.out.println("total lines : " + JavaFileUtils.countSourceLineNum(javaFile));
+        CompilationUnit cu = JPHelper.getCompilationUnit(javaFile);
+        MethodDeclaration n = cu.findAll(MethodDeclaration.class).stream()
+                .filter(md -> md.getNameAsString().contains(methodName))
+                .findFirst().orElse(null);
+//        System.out.println(n);
+//        System.out.println(n.getRange().get());
+        // reproduce
+        MethodPDG graph = PDGBuilder.one_pass_parse(project, javaFile, n);
+        Set<Integer> reserved = DTEntry.dependencyTrack(graph, chLines, 3,2);
+        System.out.println(reserved);
+        MethodDeclaration clone = n.clone();
+        MethodDeclaration n2 = SrcCodeTransformer.slice(clone, reserved);
     }
 }

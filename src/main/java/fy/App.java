@@ -12,7 +12,6 @@ public class App {
 
     public static void main(String[] args) throws IOException, GitAPIException {
         Exec exec = new Exec();
-        exec.parseArgs(args);
-        exec.run();
+        exec.exec(args);
     }
 }

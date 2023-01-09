@@ -1,53 +1,86 @@
-package fy.CCD.GW;
-
-import fy.CCD.GW.data.CommitDiff;
-import fy.CCD.GW.data.FileDiff;
-import fy.CCD.GW.data.Hunk;
-import fy.CCD.GW.utils.JGitUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.builder.Diff;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.EditList;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-class GitWalkTest {
-    String path = "/Users/fy/Documents/MyProjects/CodeChangeDataSet/gerrit";
-    Repository repository = JGitUtils.buildJGitRepository(path);
-    String logPath = "/Users/fy/Documents/fyJavaProjects/CCSALL/src/test/java/fy/CCD/GW/outputLog.txt";
-    String outputBase = "/Users/fy/Documents/fyJavaProjects/CCSALL/src/test/java/fy/CCD/GW/base";
-
-    @Test
-    void test() throws IOException, GitAPIException {
-        FileUtils.deleteDirectory(new File(outputBase));
-        new File(outputBase).mkdir();
-        GitWalk gitWalk = new GitWalk(path);
-//        gitWalk.setLogger(logPath);
-//        gitWalk.setOutputBase(outputBase);
-        gitWalk.walk1();
-        System.out.println("pre walk over");
-        gitWalk.walk(10);
-        gitWalk.check();
-        gitWalk.output(outputBase);
-    }
-
-    @Test
-    void reproduce() throws IOException, GitAPIException {
-        String v = "619c1a1384607450b03e9d8a9a7d3e0ea3982123";
-        String fileName = "ChangePredicates.java";
-        RevCommit commit = repository.parseCommit(repository.resolve(v));
-        GitWalk walk = new GitWalk(path);
-        walk.walk1();
-        CommitDiff commitDiff = walk.solve(commit, null);
-        FileDiff fileDiff = commitDiff.fileDiffs.stream().filter(fileDiff1 -> fileDiff1.getSimpleName().contains(fileName)).findFirst().get();
-        System.out.println(fileDiff);
-    }
-
-
-}
+//package fy.CCD.GW;
+//
+//import fy.CCD.running.GWRunner;
+//import fy.Config;
+//import fy.utils.git.JGitUtils;
+//import org.eclipse.jgit.api.errors.GitAPIException;
+//import org.eclipse.jgit.lib.ObjectId;
+//import org.eclipse.jgit.lib.Repository;
+//import org.eclipse.jgit.revwalk.RevCommit;
+//import org.junit.jupiter.api.Test;
+//
+//import java.io.IOException;
+//import java.util.*;
+//
+//class GitWalkTest {
+//    String path = "/Users/fy/Documents/MyProjects/CodeChangeDataSet/gerrit";
+//    Repository repository = JGitUtils.buildJGitRepository(path);
+//    String outputBase = "/Users/fy/Documents/CCSALL/src/test/java/fy/CCD/GW/base";
+//    Properties prop = Config.loadProperties();
+//
+//    @Test
+//    /**
+//     * 0 - 5851
+//     */
+//    void run() {
+//        String path = prop.getProperty("path.input");
+//        GitWalk gitWalk = new GitWalk(path);
+//        gitWalk.walk(0,100);
+//    }
+//
+//    @Test
+//    void reproduce() throws IOException, GitAPIException {
+//        String v = "f073e35b89c90f3b58978303d0a0b4fb91d85538";
+//        GitWalk walker = new GitWalk(path);
+//        RevCommit commit = repository.parseCommit(repository.resolve(v));
+//        walker.solve(commit);
+//    }
+//
+//    @Test
+//    void test_multi_thread() {
+//        String path1 = "/Users/fy/Documents/MyProjects/CodeChangeDataSet/eclipse.jdt.core";
+//        String path2 = "/Users/fy/Documents/MyProjects/CodeChangeDataSet/eclipse.platform";
+//        String path3 = "/Users/fy/Documents/MyProjects/CodeChangeDataSet/gerrit";
+//        String path4 = "/Users/fy/Documents/MyProjects/CodeChangeDataSet/mineSStuBs";
+//        List<String> paths = Arrays.asList(path1, path2, path3, path4);
+//        String base = "/Users/fy/Documents/CCSALL/src/test/java/fy/CCD/GW/multi_base";
+//        List<String> bases = Arrays.asList(
+//                base + "/" + "base1",
+//                base + "/" + "base2",
+//                base + "/" + "base3",
+//                base + "/" + "base4"
+//        );
+//        int k = 2;
+//        for (int i=0; i<k; i++) {
+//            GWRunner runner = new GWRunner(String.valueOf(i), paths.get(i), bases.get(i));
+//            runner.start();
+//        }
+//    }
+//
+//    @Test
+//    void traverse() throws GitAPIException, IOException {
+//        List<RevCommit> commits = new ArrayList<>();
+//        JGitUtils jgit = new JGitUtils(path);
+//        jgit.delete_lock_file();
+//        jgit.reset();
+//        ObjectId master = JGitUtils.getMaster(repository);
+//        if (master == null) {
+//            throw new IllegalStateException("cannot find master head to start traverse");
+//        }
+//        RevCommit head = repository.parseCommit(master);
+//        System.out.println(head);
+//        Deque<RevCommit> worklist = new ArrayDeque<>();
+//        RevCommit parent = JGitUtils.findFirstParent(repository, head);
+//        worklist.add(parent);
+//        List<RevCommit> traversed = new ArrayList<>();
+//        while (!worklist.isEmpty()) {
+//            RevCommit commit = worklist.pop();
+//            traversed.add(commit);
+//            RevCommit par = JGitUtils.findFirstParent(repository, commit);
+//            if (par != null) {
+//                worklist.add(par);
+//            }
+//        }
+//        traversed.subList(0, 100).forEach(System.out::println);
+//    }
+//}

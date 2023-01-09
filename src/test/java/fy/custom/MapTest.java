@@ -4,8 +4,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 public class MapTest {
 
     @Test

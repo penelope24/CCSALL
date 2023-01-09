@@ -83,6 +83,7 @@ public class GitWalkContinuous {
                 int idx = validCommitLines.indexOf(commitLine);
                 logger.log("analyzing line " + idx, null);
                 solver.walk();
+                solver.stat();
             } catch (GitAPIException | IOException e) {
                 e.printStackTrace();
             }

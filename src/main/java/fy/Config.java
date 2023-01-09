@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 public class Config {
@@ -39,6 +40,37 @@ public class Config {
         assert prop != null;
         // paths
         input = prop.getProperty("path.input");
+        output = prop.getProperty("path.output");
+        // gw
+        String[] ss = input.split(File.separator);
+        repoName = ss[ss.length-1];
+        max_entry_num = Integer.parseInt(prop.getProperty("gw.limit.num.entry"));
+        max_file_size = Integer.parseInt(prop.getProperty("gw.limit.size.file"));
+        max_hunk_num = Integer.parseInt(prop.getProperty("gw.limit.num.hunk"));
+        max_hunk_size = Integer.parseInt(prop.getProperty("gw.limit.size.hunk"));
+        skip_entry_tests = Boolean.parseBoolean(prop.getProperty("gw.skip.entry.test"));
+        output_batch = Integer.parseInt(prop.getProperty("gw.output.size.batch"));
+        // slice
+        a = Integer.parseInt(prop.getProperty("ccs.limit.track.data.a"));
+        k_ctrl = Integer.parseInt(prop.getProperty("ccs.limit.track.ctrl"));
+        // running
+        mode = prop.getProperty("running.mode");
+        line = Integer.parseInt(prop.getProperty("running.line"));
+        idx = Integer.parseInt(prop.getProperty("running.idx"));
+        // log
+        log_base = prop.getProperty("log.path.base");
+        log_base_exp = log_base + File.separator + "exceptions.log";
+        log_base_msg = log_base + File.separator + "msg.log";
+        log_project = log_base + File.separator + repoName;
+        log_project_exp = log_project + File.separator + "exceptions.log";
+        log_project_msg = log_project + File.separator + "msg.log";
+    }
+
+    public Config(String path) {
+        Properties prop = loadProperties();
+        assert prop != null;
+        // paths
+        input = path;
         output = prop.getProperty("path.output");
         // gw
         String[] ss = input.split(File.separator);

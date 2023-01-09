@@ -2,6 +2,7 @@ package fy.utils.log;
 
 import fy.Config;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,6 +16,16 @@ public class Logger {
 
     public Logger(Config config) {
         this.config = config;
+        File file1 = new File(config.log_base);
+        if (!file1.exists()) {
+            file1.mkdir();
+        }
+        if (mode.equals("all")) {
+            File file2 = new File(config.log_project);
+            if (!file2.exists()) {
+                file2.mkdir();
+            }
+        }
     }
 
     public void log(String msg, String note) {

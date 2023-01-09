@@ -1,17 +1,13 @@
 package fy.CCS;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
-import fy.CCD.GW.GitWalk;
-import fy.CCD.GW.data.CommitDiff;
-import fy.CCD.GW.data.FileDiff;
 import fy.CCD.GW.data.Hunk;
-import fy.CCD.GW.utils.JGitUtils;
 import fy.CCS.slicing.PDGBuilder;
 import fy.CCS.slicing.SrcCodeTransformer;
 import fy.CCS.track.DTEntry;
 import fy.GD.mgraph.MethodPDG;
+import fy.utils.git.JGitUtils;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
