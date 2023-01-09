@@ -340,7 +340,7 @@ public class LineSolver {
                     }
                     String fileName = pathName + "/" + "g1.json";
                     JsonExporter.export(JsonExporter.parse(graph), fileName);
-                    DotExporter.export(new GraphObject(graph), pathName + "/" + "g1.dot");
+//                    DotExporter.export(new GraphObject(graph), pathName + "/" + "g1.dot");
                 });
                 // v2
                 fileDiff.graphs2.forEach(graph -> {
@@ -351,7 +351,7 @@ public class LineSolver {
                     }
                     String fileName = pathName + "/" + "g2.json";
                     JsonExporter.export(JsonExporter.parse(graph), fileName); // fixme
-                    DotExporter.export(new GraphObject(graph), pathName + "/" + "g2.dot");
+//                    DotExporter.export(new GraphObject(graph), pathName + "/" + "g2.dot");
                 });
             });
             try {

@@ -10,10 +10,7 @@ import fy.utils.tools.JPHelper;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TypeStatus {
@@ -32,10 +29,9 @@ public class TypeStatus {
             List<String> validJavaFiles = allJavaFiles.stream()
                     .filter(s -> Validator.isJavaFileValid(s, logger.config))
                     .collect(Collectors.toList());
-//            System.out.println("all java files size: " + allJavaFiles.size());
-//            System.out.println("valid java files size: " + validJavaFiles.size());
             List<CompilationUnit> parseTrees = validJavaFiles.stream()
                     .map(s -> JPHelper.getCompilationUnitWithLog(s, logger))
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
             pkg2types = TypeSolverEntry.solve_pkg2types(parseTrees);
         } catch (GitAPIException e) {
