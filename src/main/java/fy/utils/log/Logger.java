@@ -16,7 +16,7 @@ public class Logger {
 
     public Logger(Config config) {
         this.config = config;
-        File file1 = new File(config.log_base);
+        File file1 = new File(config.log);
         if (!file1.exists()) {
             file1.mkdir();
         }
@@ -37,7 +37,7 @@ public class Logger {
             msg += System.lineSeparator();
         }
         // write
-        String path1 = config.log_base_msg;
+        String path1 = config.log_msg;
         String path2 = config.log_project_msg;
         write(msg, path1, path2);
         // print
@@ -55,7 +55,7 @@ public class Logger {
         }
         msg += System.lineSeparator();
         // write
-        String path1 = config.log_base_exp;
+        String path1 = config.log_exp;
         String path2 = config.log_project_exp;
         write(msg, path1, path2);
         // print
