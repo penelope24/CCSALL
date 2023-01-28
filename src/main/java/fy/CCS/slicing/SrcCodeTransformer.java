@@ -13,7 +13,7 @@ import java.util.*;
 
 public class SrcCodeTransformer {
 
-    public static MethodDeclaration slice (MethodDeclaration n, Set<Integer> reserved) {
+    public static MethodDeclaration slice(MethodDeclaration n, Set<Integer> reserved) {
         List<BlockStmt> traversedBlocks = new ArrayList<>();
         Map<Statement, Integer> removedStmtIndexMap = new HashMap<>();
         Node.BreadthFirstIterator iterator = new Node.BreadthFirstIterator(n);
@@ -74,8 +74,7 @@ public class SrcCodeTransformer {
                         if (indexMap.containsKey(pair)) {
                             int idx = indexMap.get(pair);
                             parBlock.addStatement(idx, (Statement) stmt);
-                        }
-                        else {
+                        } else {
                             parBlock.addStatement((Statement) stmt);
                         }
                     }
@@ -148,7 +147,7 @@ public class SrcCodeTransformer {
         return idx;
     }
 
-    public static Node findContainingStmt (BlockStmt block) {
+    public static Node findContainingStmt(BlockStmt block) {
         Deque<Node> visiting = new ArrayDeque<>();
         Node parentNode = block.getParentNode().get();
         visiting.add(parentNode);
@@ -166,8 +165,6 @@ public class SrcCodeTransformer {
     }
 
 
-
-
     public static boolean is_valid(Statement stmt, Set<Integer> reserved) {
         Optional<Range> rOptional = stmt.getRange();
         if (rOptional.isEmpty()) {
@@ -178,9 +175,9 @@ public class SrcCodeTransformer {
     }
 
     public static void print(Node node) {
-       System.out.println(node.getClass());
-       System.out.println(node.getRange().get().begin.line);
-       System.out.println("----------------");
+        System.out.println(node.getClass());
+        System.out.println(node.getRange().get().begin.line);
+        System.out.println("----------------");
     }
 
     public static int getNodeLineNum(Node node) {

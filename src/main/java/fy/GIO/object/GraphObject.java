@@ -11,18 +11,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GraphObject {
 
-    public boolean directed;
-    public boolean multi_graph;
-    public String commit_id;
-    public String file_name;
-    public String method_name;
-    public String method_range;
-    public int vertex_count;
-    public int edge_count;
-    public int slice_num1;
-    public int slice_num2;
-    public List<NodeInfo> nodes = new ArrayList<>();
-    public List<EdgeInfo> links = new ArrayList<>();
+    public final boolean directed;
+    public final boolean multi_graph;
+    public final String commit_id;
+    public final String file_name;
+    public final String method_name;
+    public final String method_range;
+    public final int vertex_count;
+    public final int edge_count;
+    public final int slice_num1;
+    public final int slice_num2;
+    public final List<NodeInfo> nodes = new ArrayList<>();
+    public final List<EdgeInfo> links = new ArrayList<>();
 
     public GraphObject(MethodPDG graph) {
         // graph
@@ -69,11 +69,11 @@ public class GraphObject {
         });
     }
 
-    public static class NodeInfo{
+    public static class NodeInfo {
         public int id;
-        public int line;
-        public String label;
-        public List<Integer> slices;
+        public final int line;
+        public final String label;
+        public final List<Integer> slices;
 
         public NodeInfo(GraphNode node) {
             this.line = node.getCodeLineNum();

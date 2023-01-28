@@ -17,15 +17,15 @@ public class CDEdge {
      */
     public enum Type {
 
-        EPSILON    (""),
-        TRUE       ("True"),
-        FALSE      ("False"),
-        THROWS     ("Throws"),
-        NOT_THROWS ("Not-Throws");
+        EPSILON(""),
+        TRUE("True"),
+        FALSE("False"),
+        THROWS("Throws"),
+        NOT_THROWS("Not-Throws");
 
         public final String label;
 
-        private Type(String lbl) {
+        Type(String lbl) {
             label = lbl;
         }
 

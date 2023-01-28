@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommitLine {
-    public JGitUtils jgit;
-    RevCommit head;
-    List<RevCommit> commits;
-    boolean significant;
+    public final JGitUtils jgit;
+    final RevCommit head;
+    final List<RevCommit> commits;
+    final boolean significant;
 
     public CommitLine(JGitUtils jgit, List<RevCommit> commits) {
         this.jgit = jgit;
@@ -49,8 +49,8 @@ public class CommitLine {
             return new ArrayList<>();
         }
         List<Delta> res = new ArrayList<>();
-        for (int i=size-1; i>=1; i--) {
-            res.add(new Delta(getCommitByIndex(i), getCommitByIndex(i-1)));
+        for (int i = size - 1; i >= 1; i--) {
+            res.add(new Delta(getCommitByIndex(i), getCommitByIndex(i - 1)));
         }
         assert res.size() == (size - 1);
         return res;

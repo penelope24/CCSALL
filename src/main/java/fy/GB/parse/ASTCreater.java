@@ -22,7 +22,7 @@ public class ASTCreater {
     /**
      * allCFGNodesMap 存储的是产生控制流时候创建的所有node信息
      */
-    private HashMap<String, GraphNode> allCFGNodesMap;
+    private final HashMap<String, GraphNode> allCFGNodesMap;
 
     public ASTCreater(HashMap<String, GraphNode> allCFGNodesMap) {
         this.allCFGNodesMap = allCFGNodesMap;
@@ -32,7 +32,7 @@ public class ASTCreater {
         if (node instanceof MethodDeclaration) {
             MethodDeclaration methodDeclaration = ((MethodDeclaration) node).asMethodDeclaration();
             System.out.println("********************************************");
-            System.out.println("当前正在生成AST节点方法的名字：" + methodDeclaration.getDeclarationAsString(false,false,true));
+            System.out.println("当前正在生成AST节点方法的名字：" + methodDeclaration.getDeclarationAsString(false, false, true));
             System.out.println("********************************************");
             String label = methodDeclaration.getDeclarationAsString(false, true, true);
             int lineNum = methodDeclaration.getBegin().isPresent() ? methodDeclaration.getBegin().get().line : -1;
@@ -63,13 +63,15 @@ public class ASTCreater {
             String label = expression.toString();
             int lineNum = expression.getBegin().isPresent() ? expression.getBegin().get().line : -1;
             GraphNode cfgNode = allCFGNodesMap.get(label + ":" + lineNum);
-            if(cfgNode==null){
+            if (cfgNode == null) {
                 System.out.println("stop");
             }
             //为该节点添加ast节点信息
             AstNode astNode = new AstNode();
             AstNodeInit astNodeInit = new AstNodeInit(true, astNode);
             astNodeInit.Init(expression);
+            assert cfgNode != null;
+            assert cfgNode != null;
             cfgNode.setAstRootNode(astNode);
         } else if (node instanceof IfStmt) {
             IfStmt tempIfStmt = ((IfStmt) node).asIfStmt(); //最开始的if节点
@@ -83,10 +85,10 @@ public class ASTCreater {
                 AstNodeInit astNodeInit = new AstNodeInit(true, ifAstNode);
                 astNodeInit.Init(tempIfStmt.getCondition());
                 ifCfgNode.setAstRootNode(ifAstNode);
-                if(!tempIfStmt.getThenStmt().isBlockStmt()){
+                if (!tempIfStmt.getThenStmt().isBlockStmt()) {
                     //不是blockstmt块
                     buildAST(tempIfStmt.getThenStmt());
-                }else {
+                } else {
                     //先处理这个if节点和最后跳出的节点向量
                     BlockStmt thenBlockStmt = tempIfStmt.getThenStmt().asBlockStmt();
                     NodeList<Statement> statements = thenBlockStmt.getStatements();
@@ -98,9 +100,9 @@ public class ASTCreater {
                     if (tempIfStmt.getElseStmt().get().isIfStmt()) {
                         tempIfStmt = tempIfStmt.getElseStmt().get().asIfStmt();
                     } else { //就是blockstmt
-                        if(!tempIfStmt.getElseStmt().get().isBlockStmt()){
+                        if (!tempIfStmt.getElseStmt().get().isBlockStmt()) {
                             buildAST(tempIfStmt.getElseStmt().get());
-                        }else {
+                        } else {
                             BlockStmt elseBlockStmt = tempIfStmt.getElseStmt().get().asBlockStmt();
                             NodeList<Statement> statements1 = elseBlockStmt.getStatements();
                             for (Statement statement : statements1) {
@@ -124,9 +126,9 @@ public class ASTCreater {
             astNodeInit.Init(whileStmt.getCondition());
             cfgNode.setAstRootNode(astNode);
 
-            if(!whileStmt.getBody().isBlockStmt()){
+            if (!whileStmt.getBody().isBlockStmt()) {
                 buildAST(whileStmt.getBody());
-            }else {
+            } else {
                 NodeList<Statement> statements = whileStmt.getBody().asBlockStmt().getStatements();
                 if (statements.size() == 0) {
                     //表示如果while是空的话 直接返回当前节点
@@ -153,9 +155,9 @@ public class ASTCreater {
             astNodeInit.Init(forStmt);
             cfgNode.setAstRootNode(astNode);
 
-            if(!forStmt.getBody().isBlockStmt()){
+            if (!forStmt.getBody().isBlockStmt()) {
                 buildAST(forStmt.getBody());
-            }else {
+            } else {
                 NodeList<Statement> statements = forStmt.getBody().asBlockStmt().getStatements();
                 if (statements.size() == 0) {
                     //表示如果while是空的话 直接返回当前节点
@@ -176,9 +178,9 @@ public class ASTCreater {
             astNodeInit.Init(foreachStmt);
             cfgNode.setAstRootNode(astNode);
 
-            if(!foreachStmt.getBody().isBlockStmt()){
+            if (!foreachStmt.getBody().isBlockStmt()) {
                 buildAST(foreachStmt.getBody());
-            }else {
+            } else {
                 NodeList<Statement> statements = foreachStmt.getBody().asBlockStmt().getStatements();
                 if (statements.size() == 0) {
                     //表示如果while是空的话 直接返回当前节点
@@ -205,17 +207,17 @@ public class ASTCreater {
                 //表示如果while是空的话 直接返回当前节点
                 return;
             }
-            for (int i = 0; i < caseEntries.size(); i++) {
-                NodeList<Statement> statements = caseEntries.get(i).getStatements(); //一个case下面的所有语句
-                label = caseEntries.get(i).getLabels().getFirst().isPresent() ? "case " + caseEntries.get(i).getLabels().getFirst().get().toString() : "default";
-                lineNum = caseEntries.get(i).getBegin().isPresent() ? caseEntries.get(i).getBegin().get().line : -1;
+            for (SwitchEntry caseEntry : caseEntries) {
+                NodeList<Statement> statements = caseEntry.getStatements(); //一个case下面的所有语句
+                label = caseEntry.getLabels().getFirst().isPresent() ? "case " + caseEntry.getLabels().getFirst().get().toString() : "default";
+                lineNum = caseEntry.getBegin().isPresent() ? caseEntry.getBegin().get().line : -1;
 
                 //case 增加ast node信息
-                if (caseEntries.get(i).getLabels().getFirst().isPresent()) {
+                if (caseEntry.getLabels().getFirst().isPresent()) {
                     GraphNode caseCfgNode = allCFGNodesMap.get(label + ":" + lineNum);
                     //处理ast
                     AstNode caseAstNode = new AstNode();
-                    caseAstNode.setTypeName(caseEntries.get(i).getLabels().getFirst().get().toString());
+                    caseAstNode.setTypeName(caseEntry.getLabels().getFirst().get().toString());
                     caseCfgNode.setAstRootNode(caseAstNode);
                 }
 
@@ -361,7 +363,7 @@ public class ASTCreater {
             ClassOrInterfaceDeclaration classOrInterfaceDeclaration = localClassDeclarationStmt.getClassDeclaration();
 
             String label = classOrInterfaceDeclaration.getNameAsString();
-            int lineNum = classOrInterfaceDeclaration.getBegin().isPresent()?classOrInterfaceDeclaration.getBegin().get().line:-1;
+            int lineNum = classOrInterfaceDeclaration.getBegin().isPresent() ? classOrInterfaceDeclaration.getBegin().get().line : -1;
 
             GraphNode cfgNode = allCFGNodesMap.get(label + ":" + lineNum);
             //处理ast

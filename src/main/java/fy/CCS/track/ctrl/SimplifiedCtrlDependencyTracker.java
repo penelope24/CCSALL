@@ -5,7 +5,7 @@ import fy.GD.mgraph.MethodPDG;
 
 import java.util.Set;
 
-public class SimplifiedCtrlDependencyTracker extends CtrlDependencyTracker{
+public class SimplifiedCtrlDependencyTracker extends CtrlDependencyTracker {
 
     public SimplifiedCtrlDependencyTracker(MethodPDG graph) {
         super(graph);
@@ -28,7 +28,7 @@ public class SimplifiedCtrlDependencyTracker extends CtrlDependencyTracker{
         }
     }
 
-    public void track (Set<GraphNode> dataBindNodes, int limit) {
+    public void track(Set<GraphNode> dataBindNodes, int limit) {
         dataBindNodes.forEach(n -> track(n, limit));
     }
 }

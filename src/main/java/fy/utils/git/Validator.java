@@ -19,16 +19,10 @@ public class Validator {
             }
         }
         int lineNum = JavaFileUtils.countSourceLineNum(javaFile);
-        if (lineNum > config.max_file_size || lineNum == 0) {
-            return false;
-        }
-        return true;
+        return lineNum <= config.max_file_size && lineNum != 0;
     }
 
     public static boolean isDiffEntryListValid(List<DiffEntry> diffEntries, Config config) {
-        if (diffEntries != null && !diffEntries.isEmpty() && diffEntries.size() <= config.max_entry_num) {
-            return true;
-        }
-        return false;
+        return diffEntries != null && !diffEntries.isEmpty() && diffEntries.size() <= config.max_entry_num;
     }
 }

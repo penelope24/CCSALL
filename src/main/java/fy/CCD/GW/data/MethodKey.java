@@ -6,12 +6,12 @@ import java.util.Objects;
 
 public class MethodKey {
 
-    MethodDeclaration n;
-    String version;
-    String file;
-    int startLine;
-    String name;
-    int paramNums;
+    final MethodDeclaration n;
+    final String version;
+    final String file;
+    final int startLine;
+    final String name;
+    final int paramNums;
 
     public MethodKey(MethodDeclaration n, String version, String file) {
         this.n = n;

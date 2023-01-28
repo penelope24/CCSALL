@@ -23,7 +23,7 @@ public class MethodVisitor {
     private final Set<String> package2types;
     private final List<String> imports;
     private final Set<DFVarNode> fields;
-    private Properties prop = Config.loadProperties();
+    private final Properties prop = Config.loadProperties();
 
     public MethodVisitor(VarVisitor varVisitor) {
         this.package2types = varVisitor.getCurrentPackageAllTypes();
@@ -31,7 +31,7 @@ public class MethodVisitor {
         this.fields = varVisitor.getAllFields();
     }
 
-    public MethodPDG build (MethodDeclaration n) {
+    public MethodPDG build(MethodDeclaration n) {
         boolean node_simplify = Boolean.parseBoolean(prop.getProperty("node.simplify"));
         boolean node_ast = Boolean.parseBoolean(prop.getProperty("node.ast"));
         boolean edge_dataflow = Boolean.parseBoolean(prop.getProperty("edge.dataflow"));

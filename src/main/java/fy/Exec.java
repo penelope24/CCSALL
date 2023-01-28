@@ -15,7 +15,7 @@ public class Exec {
     boolean multiple;
     String base;
     String input;
-    List<String> inputs = new ArrayList<>();
+    final List<String> inputs = new ArrayList<>();
 
     public void parseArgs(String[] args) {
         if (args == null || args.length == 0) {
@@ -35,35 +35,32 @@ public class Exec {
                 throw new IllegalStateException("wrong params");
             }
             int input_idx = argsList.indexOf("--input");
-            int path_num = base_idx -1 - input_idx;
+            int path_num = base_idx - 1 - input_idx;
             assert path_num >= 1;
             if (path_num == 1) {
                 multiple = false;
                 input = argsList.get(input_idx + 1);
-            }
-            else {
+            } else {
                 multiple = true;
-                for (int i=input_idx+1; i<=input_idx+path_num; i++) {
+                for (int i = input_idx + 1; i <= input_idx + path_num; i++) {
                     inputs.add(argsList.get(i));
                 }
             }
-        }
-        else {
+        } else {
             configBasePath = false;
             int input_idx = argsList.contains("--input") ?
                     argsList.indexOf("--input")
                     :
                     -1;
-            int last_idx = argsList.size()-1;
+            int last_idx = argsList.size() - 1;
             int path_num = last_idx - input_idx;
             assert path_num >= 1;
             if (path_num == 1) {
                 multiple = false;
                 input = argsList.get(input_idx + 1);
-            }
-            else {
+            } else {
                 multiple = true;
-                for (int i=input_idx+1; i<=input_idx+path_num; i++) {
+                for (int i = input_idx + 1; i <= input_idx + path_num; i++) {
                     inputs.add(argsList.get(i));
                 }
             }
@@ -84,8 +81,7 @@ public class Exec {
                 config.input = input;
                 config.base = base;
                 run(config);
-            }
-            else {
+            } else {
                 for (String s : inputs) {
                     Config config = new Config();
                     config.input = s;
@@ -93,14 +89,12 @@ public class Exec {
                     run(config);
                 }
             }
-        }
-        else {
+        } else {
             if (!multiple) {
                 Config config = new Config();
                 config.input = input;
                 run(config);
-            }
-            else {
+            } else {
                 for (String s : inputs) {
                     Config config = new Config();
                     config.input = s;

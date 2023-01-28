@@ -10,10 +10,10 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BreadthFirstTraversal extends MethodTraversal{
+public class BreadthFirstTraversal extends MethodTraversal {
 
-    Deque<Node> visiting = new ArrayDeque<>();
-    Deque<Node> visited = new ArrayDeque<>();
+    final Deque<Node> visiting = new ArrayDeque<>();
+    final Deque<Node> visited = new ArrayDeque<>();
 
     public BreadthFirstTraversal(MethodDeclaration n) {
         super(n);

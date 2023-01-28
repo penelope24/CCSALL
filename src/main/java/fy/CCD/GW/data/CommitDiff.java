@@ -7,11 +7,11 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import java.util.*;
 
 public class CommitDiff {
-    RevCommit commit;
-    public Repository repository;
-    public String v1;
-    public String v2;
-    public List<FileDiff> fileDiffs = new LinkedList<>();
+    public final Repository repository;
+    public final String v1;
+    public final String v2;
+    public final List<FileDiff> fileDiffs = new LinkedList<>();
+    final RevCommit commit;
 
 
     public CommitDiff(RevCommit commit, Repository repository, String v1, String v2) {

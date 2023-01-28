@@ -35,9 +35,7 @@ class SimplifiedCtrlDependencyTrackerTest {
         SimplifiedCtrlDependencyTracker tracker = new SimplifiedCtrlDependencyTracker(graph);
         tracker.track(startNode, 2);
         Set<GraphNode> res = tracker.getCtrlBindNodes();
-        res.forEach(graphNode -> {
-            System.out.println(graphNode.getCodeLineNum());
-        });
+        res.forEach(graphNode -> System.out.println(graphNode.getCodeLineNum()));
     }
 
 }

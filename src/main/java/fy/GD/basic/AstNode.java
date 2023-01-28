@@ -50,29 +50,33 @@ public class AstNode implements Serializable {
     private List<List<Node>> subListNodesPrimary;
 
     public AstNode() {
-        this.attributes = new ArrayList<String>();
-        this.subNodes = new ArrayList<AstNode>();
-        this.subLists = new ArrayList<String>();
-        this.subListNodes = new ArrayList<List<AstNode>>();
-        this.subLists_name = new ArrayList<String>();
-        this.subListNodesPrimary = new ArrayList<List<Node>>();
-        this.subNodesPrimary = new ArrayList<Node>();
+        this.attributes = new ArrayList<>();
+        this.subNodes = new ArrayList<>();
+        this.subLists = new ArrayList<>();
+        this.subListNodes = new ArrayList<>();
+        this.subLists_name = new ArrayList<>();
+        this.subListNodesPrimary = new ArrayList<>();
+        this.subNodesPrimary = new ArrayList<>();
     }
 
     public String getTypeName() {
         return typeName;
     }
 
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
+
     public List<String> getAttributes() {
         return attributes;
     }
 
-    public List<AstNode> getSubNodes() {
-        return subNodes;
+    public void setAttributes(List<String> attributes) {
+        this.attributes = attributes;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
+    public List<AstNode> getSubNodes() {
+        return subNodes;
     }
 
     public void setSubNodes(List<AstNode> subNodes) {
@@ -83,12 +87,12 @@ public class AstNode implements Serializable {
         return subLists;
     }
 
-    public List<List<AstNode>> getSubListNodes() {
-        return subListNodes;
-    }
-
     public void setSubLists(List<String> subLists) {
         this.subLists = subLists;
+    }
+
+    public List<List<AstNode>> getSubListNodes() {
+        return subListNodes;
     }
 
     public void setSubListNodes(List<List<AstNode>> subListNodes) {
@@ -99,12 +103,12 @@ public class AstNode implements Serializable {
         return name;
     }
 
-    public List<String> getSubLists_name() {
-        return subLists_name;
-    }
-
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<String> getSubLists_name() {
+        return subLists_name;
     }
 
     public void setSubLists_name(List<String> subLists_name) {
@@ -123,16 +127,12 @@ public class AstNode implements Serializable {
         return subNodesPrimary;
     }
 
-    public List<List<Node>> getSubListNodesPrimary() {
-        return subListNodesPrimary;
-    }
-
-    public void setAttributes(List<String> attributes) {
-        this.attributes = attributes;
-    }
-
     public void setSubNodesPrimary(List<Node> subNodesPrimary) {
         this.subNodesPrimary = subNodesPrimary;
+    }
+
+    public List<List<Node>> getSubListNodesPrimary() {
+        return subListNodesPrimary;
     }
 
     public void setSubListNodesPrimary(List<List<Node>> subListNodesPrimary) {

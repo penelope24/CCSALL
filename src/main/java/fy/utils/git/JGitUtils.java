@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JGitUtils {
-    public String project_path;
-    public Repository repository;
-    public Git git;
+    public final String project_path;
+    public final Repository repository;
+    public final Git git;
 
     public JGitUtils(String path) {
         this.project_path = path;
@@ -40,7 +40,7 @@ public class JGitUtils {
      * static method
      * build up a JGit Repository object by local path
      */
-    public static Repository buildJGitRepository (String path) {
+    public static Repository buildJGitRepository(String path) {
         File file = new File(path, ".git");
         Repository repository = null;
         try {
@@ -99,11 +99,9 @@ public class JGitUtils {
     public static ObjectId getMaster(Repository repository) throws IOException {
         if (repository.findRef("master") != null) {
             return repository.findRef("master").getObjectId();
-        }
-        else if (repository.findRef("main") != null) {
+        } else if (repository.findRef("main") != null) {
             return repository.findRef("main").getObjectId();
-        }
-        else {
+        } else {
             return null;
         }
 //        return repository.getBranch();
@@ -126,8 +124,8 @@ public class JGitUtils {
 
 
     /**
-     *  git checkout versionID
-     * */
+     * git checkout versionID
+     */
     public void checkout(String versionId) throws GitAPIException {
         try {
             git.checkout().setName(versionId).call();
@@ -137,15 +135,15 @@ public class JGitUtils {
     }
 
     /**
-     *  git clean -f
-     * */
+     * git clean -f
+     */
     public void clean() throws GitAPIException {
         git.clean().setForce(true).call();
     }
 
     /**
-     *  git reset --HARD
-     * */
+     * git reset --HARD
+     */
     public void reset() throws GitAPIException {
         git.reset()
                 .setMode(ResetCommand.ResetType.HARD)
@@ -156,7 +154,7 @@ public class JGitUtils {
     /**
      * 为了避免在windows系统上的“could not rename file”问题
      * 目前尚未解决
-     * */
+     */
     public void safe_checkout(String versionId) throws GitAPIException {
         clean();
         reset();

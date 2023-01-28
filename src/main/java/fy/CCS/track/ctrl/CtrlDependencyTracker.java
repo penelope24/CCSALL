@@ -11,9 +11,9 @@ import java.util.Set;
 
 public class CtrlDependencyTracker extends DependencyTracker {
     public MethodPDG graph;
-    public Deque<GraphNode> visiting = new ArrayDeque<>();
-    public Deque<GraphNode> visited = new ArrayDeque<>();
-    public Set<GraphNode> ctrlBindNodes = new LinkedHashSet<>();
+    public final Deque<GraphNode> visiting = new ArrayDeque<>();
+    public final Deque<GraphNode> visited = new ArrayDeque<>();
+    public final Set<GraphNode> ctrlBindNodes = new LinkedHashSet<>();
 
 
     public CtrlDependencyTracker(MethodPDG graph) {

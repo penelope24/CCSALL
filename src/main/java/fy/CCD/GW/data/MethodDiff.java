@@ -91,11 +91,9 @@ public class MethodDiff {
     public String getMethodName() {
         if (n1 != null) {
             return n1.getNameAsString();
-        }
-        else if (n2 != null) {
+        } else if (n2 != null) {
             return n2.getNameAsString();
-        }
-        else {
+        } else {
             return "";
         }
     }

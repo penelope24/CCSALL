@@ -17,21 +17,14 @@ import java.util.Set;
 
 public class PDGBuilder {
 
-    HashMap<String, Set<String>> pkg2types;
-    VarVisitor varVisitor;
-    MethodVisitor methodVisitor;
+    final HashMap<String, Set<String>> pkg2types;
+    final VarVisitor varVisitor;
+    final MethodVisitor methodVisitor;
 
     public PDGBuilder(HashMap<String, Set<String>> pkg2types, VarVisitor varVisitor) {
         this.pkg2types = pkg2types;
         this.varVisitor = varVisitor;
         this.methodVisitor = new MethodVisitor(varVisitor);
-    }
-
-    public MethodPDG build (MethodDeclaration n) {
-        if (this.varVisitor == null || this.methodVisitor == null || n == null) {
-            throw new IllegalStateException("null for graph building");
-        }
-        return this.methodVisitor.build(n);
     }
 
     public static MethodPDG one_pass_parse(String project, String file, MethodDeclaration n) {
@@ -59,27 +52,20 @@ public class PDGBuilder {
         }
         // step 2
         else {
-            GraphNode res2 = candidates.stream()
+            return candidates.stream()
                     .filter(graphNode -> graphNode.getCodeLineNum() == node.getCodeLineNum())
                     .filter(graphNode -> graphNode.getSimplifyCodeStr().contains(node.getSimplifyCodeStr()))
                     .findFirst().orElse(null);
-            if (res2 != null) {
-                return res2;
-            }
         }
-        return null;
     }
 
     public static Edge<GraphNode, CFEdge> findOriginalControlFlowEdge(MethodPDG original, Edge<GraphNode, CFEdge> edge) {
         GraphNode oriSrc = findOriginalNode(original, edge.source);
         GraphNode oriTgt = findOriginalNode(original, edge.target);
         if (oriSrc != null && oriTgt != null) {
-            Edge<GraphNode, CFEdge> oriEdge = original.copyEdgeSet().stream()
+            return original.copyEdgeSet().stream()
                     .filter(e -> e.source == oriSrc && e.target == oriTgt && e.label.type == edge.label.type)
                     .findFirst().orElse(null);
-            if (oriEdge != null) {
-                return oriEdge;
-            }
         }
         return null;
     }
@@ -88,17 +74,14 @@ public class PDGBuilder {
         GraphNode oriSrc = findOriginalNode(original, edge.source);
         GraphNode oriTgt = findOriginalNode(original, edge.target);
         if (oriSrc != null && oriTgt != null) {
-            Edge<GraphNode, DFEdge> oriEdge = original.dataFlowEdges.stream()
+            return original.dataFlowEdges.stream()
                     .filter(e -> e.source == oriSrc && e.target == oriTgt && e.label.type == edge.label.type)
                     .findFirst().orElse(null);
-            if (oriEdge != null) {
-                return oriEdge;
-            }
         }
         return null;
     }
 
-    public static MethodPDG slice (MethodPDG original, MethodPDG sliced) {
+    public static MethodPDG slice(MethodPDG original, MethodPDG sliced) {
         if (sliced == null) return null;
         sliced.copyVertexSet().forEach(node -> {
             GraphNode oriNode = findOriginalNode(original, node);
@@ -144,5 +127,12 @@ public class PDGBuilder {
                 oriDataFlowEdge.label.addSLice(idx);
             }
         });
+    }
+
+    public MethodPDG build(MethodDeclaration n) {
+        if (this.varVisitor == null || this.methodVisitor == null || n == null) {
+            throw new IllegalStateException("null for graph building");
+        }
+        return this.methodVisitor.build(n);
     }
 }

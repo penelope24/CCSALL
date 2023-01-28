@@ -40,7 +40,7 @@ public class Config {
         // paths
         input = prop.getProperty("path.input");
         String[] ss = input.split(File.separator);
-        repoName = ss[ss.length-1];
+        repoName = ss[ss.length - 1];
         base = prop.getProperty("path.base");
         output = base + File.separator + "output";
         log = output + File.separator + "log";

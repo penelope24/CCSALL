@@ -8,7 +8,7 @@ import ghaffarian.graphs.Edge;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class BackwardDataDepTracker extends DataDependencyTracker{
+public class BackwardDataDepTracker extends DataDependencyTracker {
 
     public BackwardDataDepTracker(MethodPDG graph) {
         super(graph);

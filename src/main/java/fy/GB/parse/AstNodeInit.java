@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
 public class AstNodeInit {
 
     private final boolean outputNodeType;
-    private AstNode astNode;
+    private final AstNode astNode;
 
     public AstNodeInit(boolean outputNodeType, AstNode astNode) {
         this.outputNodeType = outputNodeType;
@@ -43,8 +43,7 @@ public class AstNodeInit {
         // ast 中只有这种加括号的才是一整段代码，所以cfg只能加他上面，叶子节点不可能加线
         if (outputNodeType) {
             astNode.setTypeName(name + " (" + metaModel.getTypeName() + ")"); // 节点赋值
-        }
-        else {
+        } else {
             astNode.setTypeName(name);
         }
 
@@ -66,14 +65,13 @@ public class AstNodeInit {
         }
 
         for (PropertyMetaModel sl : subLists) {
-            @SuppressWarnings("unchecked")
             NodeList<? extends Node> nl = (NodeList<? extends Node>) sl.getValue(node);
             if (nl != null && nl.isNonEmpty()) {
                 astNode.getSubLists().add(sl.getName());
                 String slName = sl.getName().substring(0, sl.getName().length() - 1);
                 astNode.getSubLists_name().add(slName);
-                List<AstNode> astNodes = new ArrayList<AstNode>();
-                List<Node> primaryNodes = new ArrayList<Node>();
+                List<AstNode> astNodes = new ArrayList<>();
+                List<Node> primaryNodes = new ArrayList<>();
                 astNode.getSubListNodes().add(astNodes);
                 astNode.getSubListNodesPrimary().add(primaryNodes);
                 for (Node nd : nl) {

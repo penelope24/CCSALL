@@ -16,7 +16,7 @@ import java.io.FileNotFoundException;
 public class GBTest {
     MethodDeclaration n;
     MethodPDG graph;
-    String output = "/Users/fy/Documents/CCSALL/src/test/java/fy/GB/output";
+    final String output = "/Users/fy/Documents/CCSALL/src/test/java/fy/GB/output";
 
     @BeforeEach
     void init_a_graph() throws FileNotFoundException {

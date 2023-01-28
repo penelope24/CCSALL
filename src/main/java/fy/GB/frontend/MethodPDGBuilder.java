@@ -13,14 +13,13 @@ import ghaffarian.graphs.Edge;
 import java.util.*;
 
 public class MethodPDGBuilder {
-    private MethodDeclaration n;
+    private final MethodDeclaration n;
     private int index = 0; //表示节点的编号开始值
-    private List<String> leafNodes;
-    private Set<GraphEdge> allDFGEdgesList;
-    private Properties prop;
+    private final Set<GraphEdge> allDFGEdgesList;
+    private final Properties prop;
 
     public MethodPDGBuilder(MethodDeclaration n, Set<GraphEdge> allDFGEdgesList, Properties prop) {
-        this.leafNodes = new ArrayList<>();
+        List<String> leafNodes = new ArrayList<>();
         this.allDFGEdgesList = allDFGEdgesList;
         this.prop = prop;
         this.n = n;
@@ -36,8 +35,7 @@ public class MethodPDGBuilder {
             if (par.getDotNum() != null) {
                 //已经创立
 
-            }
-            else {
+            } else {
                 parIndexNum = "n" + (index++);
                 par.setDotNum(parIndexNum);
                 String label = DotStrFilter.filterQuotation(par.getOriginalCodeStr());
@@ -67,7 +65,7 @@ public class MethodPDGBuilder {
 //                    }
                 }
             }
-            if(cfgFlag) {
+            if (cfgFlag) {
                 //建立边结构
                 for (GraphEdge edge : par.getEdgs()) {
                     if (edge.getOriginalNode() == null || edge.getAimNode() == null) continue;
@@ -85,9 +83,9 @@ public class MethodPDGBuilder {
             }
         }
         MethodPDG mPDG = new MethodPDG(mCFG);
-        if(dfgFlag){
+        if (dfgFlag) {
             //数据流创建
-            for(GraphEdge edge:this.allDFGEdgesList){
+            for (GraphEdge edge : this.allDFGEdgesList) {
                 if (edge.getOriginalNode() == null || edge.getAimNode() == null) continue;
                 GraphNode s = edge.getOriginalNode();
                 GraphNode t = edge.getAimNode();
@@ -107,7 +105,6 @@ public class MethodPDGBuilder {
         boolean astFlag = Boolean.parseBoolean(prop.getProperty("node.ast"));
         boolean dfgFlag = Boolean.parseBoolean(prop.getProperty("edge.dataflow"));
         boolean ncsFlag = Boolean.parseBoolean(prop.getProperty("edge.ncs"));
-        MethodPDG graph = BFS(root,cfgFlag,astFlag,dfgFlag,ncsFlag);
-        return graph;
+        return BFS(root, cfgFlag, astFlag, dfgFlag, ncsFlag);
     }
 }

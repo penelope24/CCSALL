@@ -32,8 +32,7 @@ public class DotStrGenerator {
         }
         if (value instanceof String || value instanceof List) {
             s += "\"" + value + "\"";
-        }
-        else {
+        } else {
             s += value.toString();
         }
         return s;

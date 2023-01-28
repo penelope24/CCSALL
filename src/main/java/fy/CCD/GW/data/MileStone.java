@@ -5,8 +5,8 @@ import java.util.Set;
 
 public class MileStone {
 
-    String id;
-    Map<String, Set<String>> pkg2types;
+    final String id;
+    final Map<String, Set<String>> pkg2types;
 
     public MileStone(String id, Map<String, Set<String>> pkg2types) {
         this.id = id;

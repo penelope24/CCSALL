@@ -13,11 +13,11 @@ import java.util.Set;
 public class MethodPDG extends AbstractProgramGraph<GraphNode, CFEdge> {
     public String project;
     public String javaFile;
-    public MethodDeclaration n;
-    public MethodCFG mCFG;
-    public GraphNode root;
+    public final MethodDeclaration n;
+    public final MethodCFG mCFG;
+    public final GraphNode root;
     // extra edges
-    public Set<Edge<GraphNode, DFEdge>> dataFlowEdges = new LinkedHashSet<>();
+    public final Set<Edge<GraphNode, DFEdge>> dataFlowEdges = new LinkedHashSet<>();
     public Set<Edge<GraphNode, CDEdge>> controlDepEdges = new LinkedHashSet<>();
     public Set<Edge<GraphNode, ASEdge>> astEdges = new LinkedHashSet<>();
     public Set<Edge<GraphNode, NCSEdge>> nceEdges = new LinkedHashSet<>();
@@ -35,12 +35,11 @@ public class MethodPDG extends AbstractProgramGraph<GraphNode, CFEdge> {
         this.root = findRootNode(mCFG);
     }
 
-    public GraphNode findRootNode (MethodCFG mCFG) {
+    public GraphNode findRootNode(MethodCFG mCFG) {
         return mCFG.copyVertexSet().stream()
                 .filter(node -> node.getParentNode() == null)
                 .findFirst().orElse(null);
     }
-
 
 
     @Override

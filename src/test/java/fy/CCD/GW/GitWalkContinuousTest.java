@@ -6,23 +6,19 @@ import fy.utils.file.FilesHelper;
 import fy.utils.git.JGitUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 class GitWalkContinuousTest {
-    Config config = new Config();
-    String path = config.input;
+    final Config config = new Config();
+    final String path = config.input;
     Repository repository = JGitUtils.buildJGitRepository(path);
 
     // 8m -> 1m52s -> 17s amazing grace !
     @Test
-    void test () throws IOException, GitAPIException {
+    void test() throws IOException, GitAPIException {
         GitWalkContinuous walker = new GitWalkContinuous(config);
         walker.preWalk();
         walker.walk();

@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 public class PathUtils {
-    static String splitter = File.separator;
+    static final String splitter = File.separator;
 
     public static String getSplitter() {
         return splitter;
@@ -18,14 +18,14 @@ public class PathUtils {
 
     /**
      * 给定绝对路径，返回简名
-     * */
+     */
     public static String getProjectName(String projectPath) {
         return projectPath.substring(projectPath.lastIndexOf(splitter) + 1);
     }
 
     /**
      * 给定一个Git Repository对象，返回其根目录地址
-     * */
+     */
     public static String getRootPathFromRepository(Repository repository) {
         String gitRoot = repository.getDirectory().getAbsolutePath();
 //        System.out.println(gitRoot);
@@ -35,14 +35,14 @@ public class PathUtils {
 
     /**
      * get absolute path of A (null if entry type is ADD)
+     *
      * @return
      */
     public static String getOldPath(DiffEntry entry, Repository repository) {
         String relA = entry.getOldPath();
         if (relA.equals("/dev/null")) {
             return null;
-        }
-        else {
+        } else {
             String root = getRootPathFromRepository(repository);
             return root + File.separator + relA;
         }
@@ -50,33 +50,27 @@ public class PathUtils {
 
     /**
      * get absolute path of B (null if entry type is DELETE)
+     *
      * @return
      */
     public static String getNewPath(DiffEntry entry, Repository repository) {
         String relB = entry.getNewPath();
         if (relB.equals("/dev/null")) {
             return null;
-        }
-        else {
+        } else {
             String root = getRootPathFromRepository(repository);
             return root + File.separator + relB;
         }
     }
 
     public static Stream<Path> getAllDirPaths(String basePath) throws IOException {
-        Stream<Path> paths = Files.list(new File(basePath).toPath()).filter(Files::isDirectory).filter(PathUtils::isNotHiddenDirectory);
-        return paths;
+        return Files.list(new File(basePath).toPath()).filter(Files::isDirectory).filter(PathUtils::isNotHiddenDirectory);
     }
 
-    public static boolean isNotHiddenDirectory(Path path){
+    public static boolean isNotHiddenDirectory(Path path) {
         boolean flag = false;
         try {
-            if (Files.isHidden(path)) {
-                flag = false;
-            }
-            else {
-                flag = true;
-            }
+            flag = !Files.isHidden(path);
         } catch (IOException e) {
             e.printStackTrace();
         }

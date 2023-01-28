@@ -7,7 +7,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class MethodTraversal {
-    MethodDeclaration n;
+    final MethodDeclaration n;
     Deque<Node> visiting = new ArrayDeque<>();
     Deque<Node> visited = new ArrayDeque<>();
 

@@ -7,7 +7,7 @@ public class DFVarNode {
     private GraphNode node;
     private String varType;
 
-    public DFVarNode(){
+    public DFVarNode() {
 
     }
 

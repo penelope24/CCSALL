@@ -10,9 +10,9 @@ import java.nio.file.StandardOpenOption;
 
 public class Logger {
 
-    public Config config;
-    String mode = "all";
-    boolean print = true;
+    public final Config config;
+    final String mode = "all";
+    final boolean print = true;
 
     public Logger(Config config) {
         this.config = config;
@@ -32,8 +32,7 @@ public class Logger {
         // parse msg
         if (note != null) {
             msg += " | " + note + System.lineSeparator();
-        }
-        else {
+        } else {
             msg += System.lineSeparator();
         }
         // write

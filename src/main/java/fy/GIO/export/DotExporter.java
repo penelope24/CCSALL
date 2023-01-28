@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 public class DotExporter {
 
-    public static void export (GraphObject graphObject, String output) {
+    public static void export(GraphObject graphObject, String output) {
         String dotStr = new DotStrGenerator().generate(graphObject);
         try {
             Files.write(Paths.get(output), dotStr.getBytes());

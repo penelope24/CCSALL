@@ -14,11 +14,11 @@ import java.util.*;
 
 public class VarVisitor {
 
-    private HashMap<String, Set<String>> pkg2types;
-    private List<String> allImports;
+    private final HashMap<String, Set<String>> pkg2types;
+    private final List<String> allImports;
     private String pkgInfo;
     private Set<DFVarNode> allFields;
-    private CompilationUnit cu;
+    private final CompilationUnit cu;
 
     public VarVisitor(HashMap<String, Set<String>> pkg2types, CompilationUnit cu) {
         this.pkg2types = pkg2types;
@@ -28,11 +28,9 @@ public class VarVisitor {
         init();
     }
 
-    public void init () {
+    public void init() {
         // parse imports
-        cu.getImports().forEach(importDeclaration -> {
-            allImports.add(importDeclaration.getNameAsString());
-        });
+        cu.getImports().forEach(importDeclaration -> allImports.add(importDeclaration.getNameAsString()));
         // parse package
         boolean is_pkg_present = cu.findFirst(PackageDeclaration.class).isPresent();
         pkgInfo = is_pkg_present ? cu.findFirst(PackageDeclaration.class).get().getNameAsString() : "";
@@ -42,9 +40,7 @@ public class VarVisitor {
         allFields = new HashSet<>();
         cu.findAll(FieldDeclaration.class).forEach(fieldDeclaration -> {
             NodeList<VariableDeclarator> variables = fieldDeclaration.getVariables();
-            variables.forEach(var -> {
-                analyseSingleVar(var, allFields);
-            });
+            variables.forEach(var -> analyseSingleVar(var, allFields));
         });
     }
 
@@ -55,7 +51,7 @@ public class VarVisitor {
         allFields.add(new DFVarNode(name, typeName));
     }
 
-    public String parseVarType (Type type) {
+    public String parseVarType(Type type) {
         if (type.isUnknownType()) {
             // lambda 中用到的未知参数
             UnknownType unknownType = type.asUnknownType();

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DiffEntryHelper {
 
-    public static List<DiffEntry> getDiffEntryList (JGitUtils jgit, RevCommit oldCommit, RevCommit newCommit) {
+    public static List<DiffEntry> getDiffEntryList(JGitUtils jgit, RevCommit oldCommit, RevCommit newCommit) {
         List<DiffEntry> diffEntries = null;
         try {
             diffEntries = JGitUtils.listDiffEntries(jgit.repository, oldCommit, newCommit, ".java");
@@ -22,8 +22,7 @@ public class DiffEntryHelper {
     public static String getFileName(DiffEntry entry) {
         if (!entry.getOldPath().equals("/dev/null")) {
             return entry.getOldPath();
-        }
-        else if (!entry.getNewPath().equals("/dev/null")) {
+        } else if (!entry.getNewPath().equals("/dev/null")) {
             return entry.getNewPath();
         }
         return "none";
@@ -34,16 +33,15 @@ public class DiffEntryHelper {
         return name.toLowerCase().contains("test");
     }
 
-    public static boolean is_empty(DiffEntry entry) {
-        return getFileName(entry).equals("none");
+    public static boolean isNotEmpty(DiffEntry entry) {
+        return !getFileName(entry).equals("none");
     }
 
-    public static boolean is_valid (DiffEntry entry, boolean skip_test) {
+    public static boolean is_valid(DiffEntry entry, boolean skip_test) {
         if (skip_test) {
-            return (!is_test(entry)) && (!is_empty(entry));
-        }
-        else {
-            return !is_empty(entry);
+            return (!is_test(entry)) && (isNotEmpty(entry));
+        } else {
+            return isNotEmpty(entry);
         }
     }
 }

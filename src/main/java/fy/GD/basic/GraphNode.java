@@ -26,12 +26,12 @@ public class GraphNode {
     private String simplifyCodeStr;
     private int codeLineNum;
     private String dotNum;
-    private List<Integer> sliceInfo = new ArrayList<>();
+    private final List<Integer> sliceInfo = new ArrayList<>();
 
     private GraphNode parentNode;
-    private List<GraphNode> adjacentPoints; //这是cfg构建的点 后继节点
-    private List<GraphEdge> edgs; //这都是后继的边
-    private List<GraphNode> preAdjacentPoints;//前驱节点 前驱节点没有边对应
+    private final List<GraphNode> adjacentPoints; //这是cfg构建的点 后继节点
+    private final List<GraphEdge> edgs; //这都是后继的边
+    private final List<GraphNode> preAdjacentPoints;//前驱节点 前驱节点没有边对应
     private AstNode astRootNode; //连接改graphnode的Ast树入口
 
     {
@@ -84,7 +84,7 @@ public class GraphNode {
 
     //为了保证有序，而且不重复 所以需要排序重复的点
     public void addAdjacentPoint(GraphNode adjacentPoint) {
-        if(!this.adjacentPoints.contains(adjacentPoint)){ //邻接点不应该重复
+        if (!this.adjacentPoints.contains(adjacentPoint)) { //邻接点不应该重复
             this.adjacentPoints.add(adjacentPoint);
         }
     }
@@ -101,26 +101,20 @@ public class GraphNode {
     public void addEdg(GraphEdge edge) {
         //一个点的到宁外一个点的边的类型不应该重复，也就是A到B只需要一条cfg即可
         boolean insertFlug = true;
-        for(GraphEdge e:this.edgs){
-            if(e.getAimNode().equals(edge.getAimNode()) && e.getType().getColor().equals(edge.getType().getColor())){
+        for (GraphEdge e : this.edgs) {
+            if (e.getAimNode().equals(edge.getAimNode()) && e.getType().getColor().equals(edge.getType().getColor())) {
                 insertFlug = false;
                 break;
             }
         }
-        if(insertFlug){
+        if (insertFlug) {
             this.edgs.add(edge);
         }
     }
 
-    public void removeEdges(GraphNode aimNode){
+    public void removeEdges(GraphNode aimNode) {
         //有时候只是知道目标点 需要移除是目标点的边
-        Iterator<GraphEdge> iterator = this.edgs.iterator();
-        while(iterator.hasNext()){
-            GraphEdge next = iterator.next();
-            if(next.getAimNode().equals(aimNode)){
-                iterator.remove();
-            }
-        }
+        this.edgs.removeIf(next -> next.getAimNode().equals(aimNode));
     }
 
     public int getCodeLineNum() {
@@ -161,7 +155,7 @@ public class GraphNode {
 
     //添加前驱节点
     public void addPreAdjacentPoints(GraphNode preAdjacentPoint) {
-        if(!this.preAdjacentPoints.contains(preAdjacentPoint)){ //邻接点不应该重复
+        if (!this.preAdjacentPoints.contains(preAdjacentPoint)) { //邻接点不应该重复
             this.preAdjacentPoints.add(preAdjacentPoint);
         }
     }
@@ -181,18 +175,16 @@ public class GraphNode {
 
     @Override
     public boolean equals(Object obj) {
-        if(this==obj){
+        if (this == obj) {
             return true;
         }
-        if(obj==null){
+        if (obj == null) {
             return false;
         }
         //必须内容相同：行号+源码
-        if(obj instanceof GraphNode){
+        if (obj instanceof GraphNode) {
             GraphNode node = (GraphNode) obj;
-            if(this.originalCodeStr.equals(node.getOriginalCodeStr()) && this.codeLineNum==node.codeLineNum){
-                return true;
-            }
+            return this.originalCodeStr.equals(node.getOriginalCodeStr()) && this.codeLineNum == node.codeLineNum;
         }
         return false;
     }

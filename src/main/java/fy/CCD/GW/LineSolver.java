@@ -13,9 +13,7 @@ import fy.Config;
 import fy.GB.entry.TypeSolverEntry;
 import fy.GB.visitor.VarVisitor;
 import fy.GD.mgraph.MethodPDG;
-import fy.GIO.export.DotExporter;
 import fy.GIO.export.JsonExporter;
-import fy.GIO.object.GraphObject;
 import fy.utils.file.PathUtils;
 import fy.utils.git.DiffEntryHelper;
 import fy.utils.git.JGitUtils;
@@ -41,17 +39,17 @@ import java.util.stream.Stream;
 
 
 /**
- *  pseudo-greedy checking out mode
- *  progressive type solving mode
+ * pseudo-greedy checking out mode
+ * progressive type solving mode
  */
 public class LineSolver {
-    GitWalkContinuous walker;
-    CommitLine commitLine;
-    List<Delta> deltaList;
-    RevCommit head;
-    Config config;
-    JGitUtils jgit;
-    Repository repository;
+    final GitWalkContinuous walker;
+    final CommitLine commitLine;
+    final List<Delta> deltaList;
+    final RevCommit head;
+    final Config config;
+    final JGitUtils jgit;
+    final Repository repository;
     String currVersion;
     TypeStatus currStatus;
     // stats
@@ -59,16 +57,16 @@ public class LineSolver {
     int valid_commits = 0;
     int valid_but_empty_commits = 0;
     int total_checkout_times = 1;
-    int status_creates = 1; // first time build is in constructor
+    final int status_creates = 1; // first time build is in constructor
     int status_updates = 0;
     int graph_analyzed = 0;
     int gb_succ = 0;
     int slice_succ = 0;
     int total_err = 0;
     // res
-    List<CommitDiff> commitDiffs = new LinkedList<>();
+    final List<CommitDiff> commitDiffs = new LinkedList<>();
     // log
-    Logger logger;
+    final Logger logger;
 
 
     public LineSolver(CommitLine commitLine, GitWalkContinuous walker) {
@@ -86,7 +84,7 @@ public class LineSolver {
 
     public void walk() throws GitAPIException, IOException {
         int n = commitLine.getSize();
-        for (int i=0; i<n-1; i++) {
+        for (int i = 0; i < n - 1; i++) {
             System.out.println("at : " + i);
             CommitDiff commitDiff = solve(i);
             if (commitDiff != null) {
@@ -98,11 +96,11 @@ public class LineSolver {
                 System.gc();
             }
         }
-        output(n-2);
+        output(n - 2);
     }
 
     public void singleWalk(int i) throws GitAPIException, FileNotFoundException {
-        assert i >= 0 && i < commitLine.getSize()-1;
+        assert i >= 0 && i < commitLine.getSize() - 1;
         RevCommit commit = commitLine.getCommitByIndex(i);
         this.currVersion = commit.getId().name();
         this.currStatus = new TypeStatus(jgit, commit, logger);
@@ -112,7 +110,7 @@ public class LineSolver {
     public CommitDiff solve(int i) throws GitAPIException, FileNotFoundException {
         analyzed_commits++;
         RevCommit curr = commitLine.getCommitByIndex(i);
-        RevCommit next = commitLine.getCommitByIndex(i+1);
+        RevCommit next = commitLine.getCommitByIndex(i + 1);
         String v = curr.getId().name();
         assert currVersion.equals(v);
         List<DiffEntry> diffEntries = DiffEntryHelper.getDiffEntryList(jgit, next, curr);
@@ -151,8 +149,7 @@ public class LineSolver {
                 }
             }
             return commitDiff;
-        }
-        else {
+        } else {
             // only solve types, not parsing
             List<CompilationUnit> addedParseTrees = getAddedParseTrees(diffEntries);
             String v1 = next.getId().name();
@@ -185,8 +182,7 @@ public class LineSolver {
                         .filter(n -> n.getRange().isPresent())
                         .filter(n -> n.getRange().get().contains(hunk.r1))
                         .findFirst().ifPresent(enclosingMethod -> validMap.put(enclosingMethod, hunk)));
-            }
-            else {
+            } else {
                 fileDiff.hunks.forEach(hunk -> methods.stream()
                         .filter(n -> n.getRange().isPresent())
                         .filter(n -> n.getRange().get().contains(hunk.r2))
@@ -219,15 +215,13 @@ public class LineSolver {
                         graph.commitId = commitDiff.getCurrentVersion();
                         graph.simpleName = fileDiff.getSimpleName();
                         fileDiff.graphs1.add(graph);
-                    }
-                    else {
+                    } else {
                         graph.slice_num2 = idx.get();
                         graph.commitId = commitDiff.getCurrentVersion();
                         graph.simpleName = fileDiff.getSimpleName();
                         fileDiff.graphs2.add(graph);
                     }
-                }
-                catch (Exception | Error e) {
+                } catch (Exception | Error e) {
 //                    e.printStackTrace();
                     HeapChecker.print();
                     total_err++;
@@ -290,8 +284,7 @@ public class LineSolver {
             CompilationUnit cu = JPHelper.getCompilationUnitWithLog(javaFile, logger);
             if (cu == null) {
                 total_err++;
-            }
-            else {
+            } else {
                 parseTrees.add(cu);
             }
         }
@@ -344,7 +337,7 @@ public class LineSolver {
                 });
                 // v2
                 fileDiff.graphs2.forEach(graph -> {
-                    String pathName = dir + "/" + fileDiff.getSimpleName() + "_" + graph.n.getSignature().asString()+ "__";
+                    String pathName = dir + "/" + fileDiff.getSimpleName() + "_" + graph.n.getSignature().asString() + "__";
                     File f2 = new File(pathName);
                     if (!f2.exists()) {
                         f2.mkdir();
@@ -361,8 +354,7 @@ public class LineSolver {
                     f1.delete();
                 }
                 dirs.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 

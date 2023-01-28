@@ -12,13 +12,13 @@ import java.util.List;
 public class FileDiff {
 
     // change
-    public DiffEntry diffEntry;
+    public final DiffEntry diffEntry;
     public Repository repository;
-    public String path1;
-    public String path2;
-    public List<Hunk> hunks = new LinkedList<>();
-    public List<MethodPDG> graphs1 = new ArrayList<>();
-    public List<MethodPDG> graphs2 = new ArrayList<>();
+    public final String path1;
+    public final String path2;
+    public final List<Hunk> hunks = new LinkedList<>();
+    public final List<MethodPDG> graphs1 = new ArrayList<>();
+    public final List<MethodPDG> graphs2 = new ArrayList<>();
 
     public FileDiff(DiffEntry diffEntry, Repository repository) {
         this.diffEntry = diffEntry;
@@ -38,19 +38,14 @@ public class FileDiff {
         String[] ss;
         if (path1 != null) {
             ss = path1.split("/");
-        }
-        else {
+        } else {
             ss = path2.split("/");
         }
-        return ss[ss.length-1];
+        return ss[ss.length - 1];
     }
 
 
-
     public boolean isValid() {
-        if (!graphs1.isEmpty() || !graphs2.isEmpty()) {
-            return true;
-        }
-        return false;
+        return !graphs1.isEmpty() || !graphs2.isEmpty();
     }
 }

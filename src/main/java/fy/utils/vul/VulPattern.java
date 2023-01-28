@@ -9,9 +9,14 @@ import java.io.IOException;
  * 用正则表达式定义常见vulnerable commit的模式
  */
 public class VulPattern {
-    private String pattern_path = "/Users/fy/Documents/MyProjects/java/ProgramGraphs/src/main/resources/vul_patterns";
+
+    public static void main(String[] args) throws IOException {
+        VulPattern vulPattern = new VulPattern();
+        System.out.println(vulPattern.buildPattern("vuln"));
+    }
 
     public String buildPattern(String patternFile) throws IOException {
+        String pattern_path = "/Users/fy/Documents/MyProjects/java/ProgramGraphs/src/main/resources/vul_patterns";
         String path = pattern_path + File.separator + patternFile;
         StringBuilder sb = new StringBuilder();
         BufferedReader br1 = new BufferedReader(new FileReader(path + ".prefix"));
@@ -22,18 +27,11 @@ public class VulPattern {
         while ((str = br2.readLine()) != null) {
             sb.append(str.stripTrailing()).append("|");
         }
-        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length() - 1);
         br2.close();
         BufferedReader br3 = new BufferedReader(new FileReader(path + ".suffix"));
         sb.append(br3.readLine());
         br3.close();
         return sb.toString();
-    }
-
-
-
-    public static void main(String[] args) throws IOException {
-        VulPattern vulPattern = new VulPattern();
-        System.out.println(vulPattern.buildPattern("vuln"));
     }
 }

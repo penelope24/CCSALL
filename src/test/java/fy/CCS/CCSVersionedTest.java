@@ -15,17 +15,17 @@ import java.util.List;
 import java.util.Set;
 
 public class CCSVersionedTest {
-    String project = "/Users/fy/Documents/MyProjects/CodeChangeDataSet/gerrit";
+    final String project = "/Users/fy/Documents/MyProjects/CodeChangeDataSet/gerrit";
     Repository repository = JGitUtils.buildJGitRepository(project);
-    int MAX_DATA_DEPTH = 3;
-    int MAX_CTRL_DEPTH = 2;
+    final int MAX_DATA_DEPTH = 3;
+    final int MAX_CTRL_DEPTH = 2;
 
     @Test
     void test() throws IOException {
 
     }
 
-    public  void slice1(Hunk hunk) {
+    public void slice1(Hunk hunk) {
         MethodDeclaration n = hunk.n1;
         MethodDeclaration nClone = n.clone();
         MethodPDG graph = PDGBuilder.one_pass_parse(project, hunk.fileDiff.path1, n);

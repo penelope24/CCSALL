@@ -13,17 +13,16 @@ import java.util.stream.IntStream;
 public class Hunk {
     public CommitDiff commitDiff;
     public FileDiff fileDiff;
-    public Edit edit;
-    public Edit.Type type;
-    public Range r1;
-    public Range r2;
+    public final Edit edit;
+    public final Edit.Type type;
+    public final Range r1;
+    public final Range r2;
     public MethodDeclaration n1;
     public MethodDeclaration n2;
     public MethodPDG graph1;
     public MethodPDG graph2;
     public MethodPDG slice1;
     public MethodPDG slice2;
-
 
 
     public Hunk(Edit edit) {
@@ -34,27 +33,21 @@ public class Hunk {
     }
 
     public boolean is_valid() {
-        if (slice1 == null && slice2 == null) {
-            return false;
-        }
-        return true;
+        return slice1 != null || slice2 != null;
     }
 
     public boolean is_full() {
-        if (slice1 != null && slice2 != null) {
-            return true;
-        }
-        return false;
+        return slice1 != null && slice2 != null;
     }
 
     public List<Integer> getRemLines() {
-        return IntStream.range(r1.begin.line+1, r1.end.line+1)
+        return IntStream.range(r1.begin.line + 1, r1.end.line + 1)
                 .boxed()
                 .collect(Collectors.toList());
     }
 
     public List<Integer> getAddLines() {
-        return IntStream.range(r2.begin.line+1, r2.end.line+1)
+        return IntStream.range(r2.begin.line + 1, r2.end.line + 1)
                 .boxed()
                 .collect(Collectors.toList());
     }
@@ -62,11 +55,9 @@ public class Hunk {
     public int getEditStartLine() {
         if (r1 != null) {
             return r1.begin.line;
-        }
-        else if (r2 !=null) {
+        } else if (r2 != null) {
             return r2.begin.line;
-        }
-        else {
+        } else {
             return -1;
         }
     }
@@ -75,18 +66,20 @@ public class Hunk {
         return edit.getType().name();
     }
 
-    public String getCommitId() {return commitDiff.getCurrentVersion();}
+    public String getCommitId() {
+        return commitDiff.getCurrentVersion();
+    }
 
-    public String getSimpleFileName() {return fileDiff.getSimpleName();}
+    public String getSimpleFileName() {
+        return fileDiff.getSimpleName();
+    }
 
     public String getMethodName() {
         if (n1 != null) {
             return n1.getNameAsString();
-        }
-        else if (n2 != null) {
+        } else if (n2 != null) {
             return n2.getNameAsString();
-        }
-        else {
+        } else {
             return "none";
         }
     }

@@ -15,12 +15,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class GitWalkContinuous {
-    public Config config;
-    public Repository repository;
-    public JGitUtils jgit;
-    public List<RevCommit> allCommits = new ArrayList<>();
-    public Set<RevCommit> traversed = new HashSet<>();
-    public Logger logger;
+    public final Config config;
+    public final Repository repository;
+    public final JGitUtils jgit;
+    public final List<RevCommit> allCommits = new ArrayList<>();
+    public final Set<RevCommit> traversed = new HashSet<>();
+    public final Logger logger;
 
     public GitWalkContinuous(Config config) {
         this.config = config;
@@ -31,6 +31,7 @@ public class GitWalkContinuous {
 
     /**
      * init git history
+     *
      * @throws IOException
      * @throws GitAPIException
      */
@@ -70,6 +71,7 @@ public class GitWalkContinuous {
 
     /**
      * walk continuously by each commitLine, and parse each commit.
+     *
      * @throws GitAPIException
      * @throws IOException
      */

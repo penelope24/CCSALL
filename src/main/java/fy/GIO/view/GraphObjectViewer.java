@@ -8,7 +8,7 @@ import java.io.FileReader;
 
 public class GraphObjectViewer {
 
-    public static GraphObject fromJSON (String jsonPath) {
+    public static GraphObject fromJSON(String jsonPath) {
         Gson gson = new Gson();
         try {
             return gson.fromJson(new FileReader(jsonPath), GraphObject.class);

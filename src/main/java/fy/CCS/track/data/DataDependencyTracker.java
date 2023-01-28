@@ -12,12 +12,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class DataDependencyTracker extends DependencyTracker {
-    public MethodPDG graph;
+    public final MethodPDG graph;
     public int MAX_DATA_DEPTH = 3; // default
-    public Deque<Edge<GraphNode, DFEdge>> visiting = new ArrayDeque<>();
-    public Deque<Edge<GraphNode, DFEdge>> visited = new ArrayDeque<>();
-    public Set<GraphNode> dataBindNodes = new LinkedHashSet<>();
-    public Set<Edge<GraphNode, DFEdge>> dataBindEdges = new LinkedHashSet<>();
+    public final Deque<Edge<GraphNode, DFEdge>> visiting = new ArrayDeque<>();
+    public final Deque<Edge<GraphNode, DFEdge>> visited = new ArrayDeque<>();
+    public final Set<GraphNode> dataBindNodes = new LinkedHashSet<>();
+    public final Set<Edge<GraphNode, DFEdge>> dataBindEdges = new LinkedHashSet<>();
 
     public DataDependencyTracker(MethodPDG graph) {
         super(graph);

@@ -1,11 +1,11 @@
 package fy.GD.basic;
 
 public enum EdgeTypes {
-    CFG("red"),AST("black"),DFG("green"),NCS("blue"),CALL("yellow");
+    CFG("red"), AST("black"), DFG("green"), NCS("blue"), CALL("yellow");
 
     private String color;
 
-    private EdgeTypes(String color){
+    EdgeTypes(String color) {
         this.color = color;
     }
 

@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class MethodCFG extends AbstractProgramGraph<GraphNode, CFEdge> {
 
-    MethodDeclaration md;
+    final MethodDeclaration md;
 
     public MethodCFG(MethodDeclaration md) {
         this.md = md;

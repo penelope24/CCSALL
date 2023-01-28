@@ -11,17 +11,39 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 public class TypeSolver {
-    private HashMap<String, Set<String>> package2types;
-    private Set<String> hasDealJavaFiles;
-    private Set<CompilationUnit> hasDealParseTrees;
+    private final HashMap<String, Set<String>> package2types;
+    private final Set<String> hasDealJavaFiles;
+    private final Set<CompilationUnit> hasDealParseTrees;
 
-    public TypeSolver(){
+    public TypeSolver() {
         this.package2types = new HashMap<>();
         this.hasDealJavaFiles = new HashSet<>();
         this.hasDealParseTrees = new HashSet<>();
     }
 
-    public void collect(List<String> javaFiles){
+    public static String solveSimpleTypeName(String simpleTypeName, List<String> allImports, String pkg,
+                                             HashMap<String, Set<String>> pkg2types) {
+        // find in imports
+        for (String str : allImports) {
+            if (simpleTypeName.equals(str.substring(str.lastIndexOf(".") + 1))) {
+                return str;
+            }
+        }
+        //if not in imports , find in types in current package
+
+        Set<String> currentPackageTypes = pkg2types.get(pkg);
+        if (currentPackageTypes != null) {
+            for (String packType : currentPackageTypes) {
+                if (simpleTypeName.equals(packType.substring(packType.lastIndexOf(".") + 1))) {
+                    return packType;
+                }
+            }
+        }
+        //if not imports nor package types, then it's java lang types
+        return "java.lang." + simpleTypeName;
+    }
+
+    public void collect(List<String> javaFiles) {
         javaFiles.forEach(s -> {
             if (!hasDealJavaFiles.contains(s)) {
                 try {
@@ -32,10 +54,9 @@ public class TypeSolver {
                     HashMap<TypeDeclaration, String> type2parent = new HashMap<>();
                     Queue<TypeDeclaration> queue = new LinkedList<>();
                     NodeList<TypeDeclaration<?>> types = cu.getTypes();
-                    String finalPkgInfo = pkgInfo;
                     types.forEach(typeDeclaration -> {
                         queue.add(typeDeclaration);
-                        type2parent.put(typeDeclaration, finalPkgInfo);
+                        type2parent.put(typeDeclaration, pkgInfo);
                     });
                     while (!queue.isEmpty()) {
                         TypeDeclaration tmpType = queue.poll();
@@ -73,10 +94,9 @@ public class TypeSolver {
                 HashMap<TypeDeclaration, String> type2parent = new HashMap<>();
                 Queue<TypeDeclaration> queue = new LinkedList<>();
                 NodeList<TypeDeclaration<?>> types = cu.getTypes();
-                String finalPkgInfo = pkgInfo;
                 types.forEach(typeDeclaration -> {
                     queue.add(typeDeclaration);
-                    type2parent.put(typeDeclaration, finalPkgInfo);
+                    type2parent.put(typeDeclaration, pkgInfo);
                 });
                 while (!queue.isEmpty()) {
                     TypeDeclaration tmpType = queue.poll();
@@ -100,28 +120,6 @@ public class TypeSolver {
                 this.hasDealParseTrees.add(cu);
             }
         });
-    }
-
-    public static String solveSimpleTypeName(String simpleTypeName, List<String> allImports, String pkg,
-                                             HashMap<String, Set<String>> pkg2types) {
-        // find in imports
-        for (String str : allImports) {
-            if (simpleTypeName.equals(str.substring(str.lastIndexOf(".") + 1))) {
-                return str;
-            }
-        }
-        //if not in imports , find in types in current package
-
-        Set<String> currentPackageTypes = pkg2types.get(pkg);
-        if (currentPackageTypes != null) {
-            for (String packType : currentPackageTypes) {
-                if (simpleTypeName.equals(packType.substring(packType.lastIndexOf(".") + 1))) {
-                    return packType;
-                }
-            }
-        }
-        //if not imports nor package types, then it's java lang types
-        return "java.lang." + simpleTypeName;
     }
 
     public HashMap<String, Set<String>> getPackage2types() {
