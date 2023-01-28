@@ -1,0 +1,1 @@
+java -jar --input path1 path2 path3 --base path
